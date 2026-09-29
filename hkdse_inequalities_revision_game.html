@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE Mathematics — Ch. 17 Inequalities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global', linebreaks: { inline: true } }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Paper typography: question text in Times New Roman, unknowns italic */
+        #question-display, #l3-blocks, .qtext { font-family: 'Times New Roman', Times, serif; }
+        .mathvar { font-style: italic; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .heart-bounce { animation: bounce 1s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20%) scale(1.1); }
+        }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .toast {
+            min-width: 250px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        .toast.info { background-color: #3b82f6; }
+        .toast.fade-out { animation: fadeOut 0.5s ease-in forwards; }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px;}
+        ::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        .format-btn.active {
+            border-color: #f59e0b !important;
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #fde68a !important;
+        }
+        #question-display mjx-container,
+        #l3-blocks mjx-container {
+            margin: 0 0.25em !important;
+            font-size: 1em !important;
+        }
+        #question-display mjx-container svg,
+        #l3-blocks mjx-container svg {
+            display: inline-block !important;
+        }
+
+        /* ==== COLORFUL THEME + ANSWER ANIMATIONS ==== */
+        body {
+            background-image:
+                radial-gradient(ellipse 80% 50% at 15% -10%, rgba(99, 102, 241, 0.30), transparent 60%),
+                radial-gradient(ellipse 60% 45% at 85% -5%, rgba(217, 70, 239, 0.22), transparent 60%),
+                radial-gradient(ellipse 75% 50% at 50% 110%, rgba(34, 211, 238, 0.20), transparent 60%);
+            background-attachment: fixed;
+        }
+        #login-screen h1 {
+            background: linear-gradient(90deg, #fbbf24, #f472b6, #818cf8, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #dashboard-screen .glass-panel:hover { box-shadow: 0 0 26px rgba(139, 92, 246, 0.25); }
+        @keyframes flashGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            50% { box-shadow: 0 0 42px 10px rgba(34, 197, 94, 0.55); }
+        }
+        @keyframes flashRed {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            30%, 60% { box-shadow: 0 0 48px 12px rgba(239, 68, 68, 0.6); }
+        }
+        .correct-flash { animation: flashGreen 0.7s ease-in-out; }
+        .wrong-flash { animation: flashRed 0.6s ease-in-out; }
+        @keyframes scoreBounce {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.45); }
+            100% { transform: scale(1); }
+        }
+        .score-bounce { animation: scoreBounce 0.5s ease; }
+        @keyframes heartBreakAnim {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(1.6); }
+            100% { transform: scale(0.4); opacity: 0.35; }
+        }
+        .heart-broken { display: inline-block; animation: heartBreakAnim 0.55s ease forwards; }
+        @keyframes badgeBounce {
+            0% { transform: scale(0.7); }
+            55% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+        .badge-bounce { animation: badgeBounce 0.6s ease; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-amber-500 selection:text-white">
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="login-screen" class="w-full max-w-md glass-panel rounded-3xl p-8 shadow-2xl transition-all duration-500">
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-4">🧮</div>
+            <h1 class="text-2xl font-bold text-white mb-2">HKDSE Mathematics</h1>
+            <h2 class="text-amber-400 font-semibold tracking-wide uppercase text-sm">Ch. 17 Inequalities</h2>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Class (e.g., 4A)</label>
+                <input type="text" id="student-class" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 uppercase" placeholder="4A">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Class Number</label>
+                <input type="number" id="student-no" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" placeholder="12">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Name</label>
+                <input type="text" id="student-name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" placeholder="Chan Tai Man">
+            </div>
+            <button onclick="login()" class="w-full mt-6 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 px-4 rounded-lg transition shadow-lg shadow-amber-500/20 active:scale-95">
+                Start Mission
+            </button>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="hidden w-full max-w-3xl flex flex-col gap-6 transition-all duration-500">
+
+        <!-- Header -->
+        <div class="glass-panel rounded-2xl p-6 flex justify-between items-center shadow-xl">
+            <div>
+                <h2 class="text-2xl font-bold text-white" id="display-name">Welcome, Student</h2>
+                <p class="text-slate-400 text-sm">Class: <span id="display-class" class="text-amber-400 font-semibold"></span> | No: <span id="display-no" class="text-amber-400 font-semibold"></span></p>
+            </div>
+            <button onclick="logout()" class="text-slate-400 hover:text-white transition text-sm">
+                Switch User 🚪
+            </button>
+        </div>
+
+        <!-- Completion Passport -->
+        <div class="glass-panel rounded-2xl p-6 shadow-xl border border-amber-500/30 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none text-8xl">🎓</div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-700/60 pb-4">
+                <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    🎓 Completion Passport (學習記錄卡)
+                </h3>
+                <div class="flex flex-wrap gap-2 z-10 justify-end">
+                    <button id="btn-submit-teacher" onclick="submitToTeacher()" class="bg-blue-600 hover:bg-blue-500 border border-blue-400 text-white px-3 py-2 rounded-lg font-semibold transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2 active:scale-95">
+                        <span>Submit to Teacher</span> 📧
+                    </button>
+                    <button onclick="resetBadges()" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-slate-200 px-3 py-2 rounded-lg transition text-sm active:scale-95">
+                        Reset 🔄
+                    </button>
+                </div>
+            </div>
+
+            <!-- Score Board -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                <div class="bg-slate-800/80 rounded-xl p-4 text-center border border-slate-700 transition duration-300" id="badge-card-1">
+                    <div class="text-3xl mb-2" id="badge-icon-1">🔒</div>
+                    <div class="font-bold text-slate-200">Level 1</div>
+                    <div class="text-xs text-slate-400 mb-2">TSA 3A03 + Paper 1</div>
+                    <div id="badge-status-1" class="text-sm font-semibold text-slate-500">Not Attempted</div>
+                    <div class="mt-2 inline-flex items-center gap-1 bg-slate-900/80 border border-amber-500/30 rounded-full px-3 py-1">
+                        <span class="text-xs text-amber-300 font-bold">⭐ <span id="score-1">0</span> marks</span>
+                    </div>
+                </div>
+                <div class="bg-slate-800/80 rounded-xl p-4 text-center border border-slate-700 transition duration-300" id="badge-card-2">
+                    <div class="text-3xl mb-2" id="badge-icon-2">🔒</div>
+                    <div class="font-bold text-slate-200">Level 2</div>
+                    <div class="text-xs text-slate-400 mb-2">Paper 2 MC</div>
+                    <div id="badge-status-2" class="text-sm font-semibold text-slate-500">Not Attempted</div>
+                    <div class="mt-2 inline-flex items-center gap-1 bg-slate-900/80 border border-amber-500/30 rounded-full px-3 py-1">
+                        <span class="text-xs text-amber-300 font-bold">⭐ <span id="score-2">0</span> marks</span>
+                    </div>
+                </div>
+                <div class="bg-slate-800/80 rounded-xl p-4 text-center border border-slate-700 transition duration-300" id="badge-card-3">
+                    <div class="text-3xl mb-2" id="badge-icon-3">🔒</div>
+                    <div class="font-bold text-slate-200">Level 3</div>
+                    <div class="text-xs text-slate-400 mb-2">Paper 1 Questions</div>
+                    <div id="badge-status-3" class="text-sm font-semibold text-slate-500">Not Attempted</div>
+                    <div class="mt-2 inline-flex items-center gap-1 bg-slate-900/80 border border-amber-500/30 rounded-full px-3 py-1">
+                        <span class="text-xs text-amber-300 font-bold">⭐ <span id="score-3">0</span> marks</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 relative z-10 flex justify-center">
+                <div class="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 rounded-full px-6 py-2 flex items-center gap-3">
+                    <span class="text-lg">🏆</span>
+                    <span class="text-sm font-bold text-amber-300">Total Marks: <span id="total-marks" class="text-xl font-extrabold text-yellow-300">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button onclick="startGame(1)" class="glass-panel rounded-2xl p-6 text-left hover:-translate-y-1 transition duration-300 border-t-4 border-green-500 group relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-xl text-white group-hover:text-green-400 transition">Level 1</h3>
+                    <span class="text-2xl group-hover:scale-110 transition">🟢</span>
+                </div>
+                <p class="text-slate-400 text-sm relative z-10">TSA 3A03 (compare, properties, word problems, solve) plus Paper 1 inequalities.</p>
+            </button>
+
+            <button onclick="startGame(2)" class="glass-panel rounded-2xl p-6 text-left hover:-translate-y-1 transition duration-300 border-t-4 border-amber-500 group relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-xl text-white group-hover:text-amber-400 transition">Level 2</h3>
+                    <span class="text-2xl group-hover:scale-110 transition">🟡</span>
+                </div>
+                <p class="text-slate-400 text-sm relative z-10">Paper 2 MC: "and" / "or" / chained inequalities, least-integer and discriminant questions (Q287–304).</p>
+            </button>
+
+            <button onclick="startGame(3)" class="glass-panel rounded-2xl p-6 text-left hover:-translate-y-1 transition duration-300 border-t-4 border-red-500 group relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-xl text-white group-hover:text-red-400 transition">Level 3</h3>
+                    <span class="text-2xl group-hover:scale-110 transition">🔴</span>
+                </div>
+                <p class="text-slate-400 text-sm relative z-10">Past-paper long questions: solve the compound inequality, then count / identify the integers (Paper 1 Q115–127).</p>
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="hidden w-full max-w-3xl flex flex-col gap-4">
+
+        <div class="flex justify-between items-center bg-slate-800 rounded-full px-6 py-3 shadow-lg border border-slate-700">
+            <div class="font-bold text-amber-400" id="level-indicator">Level 1</div>
+            <div class="flex gap-1 text-xl" id="lives-container">
+                <!-- Hearts injected here -->
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="text-slate-300 font-mono bg-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
+                    Q: <span id="q-counter">1/5</span>
+                </div>
+                <div class="text-amber-300 font-mono bg-slate-900 border border-amber-500/30 px-3 py-1 rounded-full text-sm font-semibold">
+                    ⭐ <span id="live-score">0</span>
+                </div>
+            </div>
+            <button onclick="quitGame()" class="text-slate-500 hover:text-red-400 transition text-xs font-bold uppercase tracking-wider">
+                Abort
+            </button>
+        </div>
+
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl text-center min-h-[350px] flex flex-col relative w-full" id="main-game-area">
+
+            <div class="w-full flex justify-between items-center mb-2 border-b border-slate-700/50 pb-3">
+                <div class="flex flex-col text-left">
+                    <h3 class="text-slate-300 text-sm font-semibold" id="question-instruction">Solve the percentage problem:</h3>
+                    <div class="flex gap-3 flex-wrap">
+                        <span class="text-xs text-amber-400 font-semibold" id="format-hint"></span>
+                        <span class="text-xs text-sky-400 font-semibold" id="paper-hint"></span>
+                        <span class="text-xs text-emerald-400 font-semibold" id="part-label"></span>
+                    </div>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="askAITutor()" class="text-[10px] sm:text-xs bg-purple-600/20 text-purple-300 border border-purple-500/30 px-3 py-1.5 rounded-full hover:bg-purple-600/40 transition font-bold active:scale-95 flex items-center gap-1">
+                        Ask AI ✨
+                    </button>
+                    <button onclick="toggleCheatSheet()" class="text-[10px] sm:text-xs bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full hover:bg-blue-600/40 transition active:scale-95 flex items-center gap-1">
+                        Formulas 💡
+                    </button>
+                </div>
+            </div>
+
+            <div id="question-display" class="text-xl sm:text-2xl text-white mb-6 overflow-x-auto py-6 px-4 text-center leading-relaxed min-h-[120px] max-w-full">
+                <!-- MathJax renders here -->
+            </div>
+
+            <div id="mc-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden w-full mt-auto">
+                <button onclick="submitMCAnswer(0)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+                <button onclick="submitMCAnswer(1)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+                <button onclick="submitMCAnswer(2)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+                <button onclick="submitMCAnswer(3)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+            </div>
+
+            <div id="conventional-area" class="hidden flex flex-col items-center gap-4 w-full max-w-md mx-auto mt-auto">
+                <p class="text-[11px] text-slate-400 text-center leading-tight">
+                    Type your answer using <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>&lt;</code>, <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>&gt;</code>, <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>≤</code>, <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>≥</code> and <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>/</code>.<br>
+                    E.g. <span class='font-mono text-emerald-400'>x &gt; 3</span>, <span class='font-mono text-emerald-400'>-2 ≤ x &lt; 5</span> or <span class='font-mono text-emerald-400'>x &lt; -2 or x &gt; 3</span>
+                </p>
+
+                <div class="flex gap-2 w-full">
+                    <input type="text" id="conventional-input" placeholder="e.g. 800 or 20%" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-lg font-mono text-white outline-none focus:border-amber-500 transition shadow-inner" oninput="updateLivePreview()" onkeypress="handleEnter(event)">
+                    <button onclick="submitFillAnswer()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 rounded-lg text-base transition shadow-md active:scale-95">
+                        Submit
+                    </button>
+                </div>
+
+                <div id="helper-buttons" class="flex flex-wrap gap-2 justify-center w-full mt-1">
+                    <!-- dynamically injected helper buttons -->
+                </div>
+
+                <div class="w-full p-4 bg-slate-900/60 border border-slate-700 rounded-lg text-center min-h-[80px] flex flex-col justify-center items-center mt-2">
+                    <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Live Answer Preview</span>
+                    <div id="math-preview" class="text-xl text-slate-300 min-h-[30px] flex items-center justify-center">Empty</div>
+                </div>
+            </div>
+
+            <!-- Level 3: multi-part (a)(b) blocks, each with its own question + answer area -->
+            <div id="l3-area" class="hidden w-full mt-auto">
+                <div id="l3-blocks" class="flex flex-col gap-4"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CHEAT SHEET MODAL -->
+    <div id="cheat-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity" onclick="if(event.target===this) toggleCheatSheet()">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-600 max-w-sm w-full shadow-2xl">
+            <h3 class="text-2xl font-bold text-amber-400 mb-4 border-b border-slate-700 pb-2">Inequality Rules</h3>
+            <ul class="space-y-4 text-lg font-serif">
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Solve like an equation:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(ax + b < cx + d\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">× / ÷ by a negative ⇒ flip sign:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(-x > a \Rightarrow x < -a\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Clear a fraction ⇒ × LCM:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(\dfrac{ax+b}{c} \Rightarrow ax+b\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">"and" ⇒ overlap (intersection):</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(a < x\) and \(x < b \Rightarrow a < x < b\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">"or" ⇒ union:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(x < a\) or \(x > b\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Chained inequality ⇒ split:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(a < b < c \Rightarrow a < b\) and \(b < c\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Quadratic ≥ 0 for all x ⇒ a &gt; 0 and Δ ≤ 0:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(\Delta = b^2 - 4ac \le 0\)</span></li>
+            </ul>
+            <button onclick="toggleCheatSheet()" class="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg active:scale-95 transition">Close</button>
+        </div>
+    </div>
+
+    <!-- AI TUTOR MODAL -->
+    <div id="ai-tutor-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity" onclick="if(event.target===this) closeAITutor()">
+        <div class="glass-panel border border-purple-500/50 max-w-lg w-full rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
+                <h3 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 flex items-center gap-2">
+                    <span>✨ AI Tutor (HKDSE 導師)</span>
+                </h3>
+                <button onclick="closeAITutor()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+
+            <div id="ai-content-area" class="flex-1 overflow-y-auto pr-2 space-y-4 text-slate-200 text-sm sm:text-base leading-relaxed">
+                <!-- AI tutor contents rendered here -->
+            </div>
+
+            <button onclick="closeAITutor()" class="mt-6 w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl transition active:scale-95">
+                Got it, thanks!
+            </button>
+        </div>
+    </div>
+
+    <!-- WRONG ANSWER TECHNIQUE REFLECTION MODAL -->
+    <div id="wrong-reflection-modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[60] p-4 backdrop-blur-md transition-opacity">
+        <div class="glass-panel border-2 border-red-500/40 max-w-md w-full rounded-2xl shadow-2xl p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-4 border-b border-slate-700 pb-3">
+                <span class="text-3xl">🛑</span>
+                <h3 class="text-xl font-bold text-red-400">Wait! Let's Reflect</h3>
+            </div>
+            <p class="text-slate-300 mb-6 text-sm">You got that one wrong. Before moving on, which <strong>technique</strong> was primarily needed to solve that question?</p>
+
+            <div class="space-y-3">
+                <button onclick="submitWrongReflection('isolate_x')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Isolate x (move x-terms to one side)</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(ax + b < cx + d\)</span>
+                </button>
+                <button onclick="submitWrongReflection('flip_sign')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Flip the sign (× / ÷ by a negative)</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(-x > a \Rightarrow x < -a\)</span>
+                </button>
+                <button onclick="submitWrongReflection('clear_fraction')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Clear the fraction (multiply by the LCM)</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(\dfrac{ax+b}{c} \Rightarrow ax+b\)</span>
+                </button>
+                <button onclick="submitWrongReflection('intersect')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">"and" → take the overlap</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(a < x\) and \(x < b\)</span>
+                </button>
+                <button onclick="submitWrongReflection('union')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">"or" → take the union</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(x < a\) or \(x > b\)</span>
+                </button>
+                <button onclick="submitWrongReflection('chained_split')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Split a chained inequality a &lt; b &lt; c</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(a < b\) and \(b < c\)</span>
+                </button>
+                <button onclick="submitWrongReflection('discriminant')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Quadratic ≥ 0 for all x ⇒ a &gt; 0 and Δ ≤ 0</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(\Delta = b^2 - 4ac \le 0\)</span>
+                </button>
+                <button onclick="submitWrongReflection('compare')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Compare the numbers (or the boundary)</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(a \gtrless b\)</span>
+                </button>
+                <button onclick="submitWrongReflection('count_integers')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Count the integers in the range</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(a < x \le b\)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WRONG ANSWER FEEDBACK MODAL -->
+    <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-red-950/90 backdrop-blur-md border-2 border-red-500 text-red-100 px-6 py-4 rounded-xl shadow-2xl hidden z-50 text-center max-w-sm w-full transition-all">
+        <div class="flex items-center justify-center gap-2 mb-1">
+            <span class="text-2xl">❌</span>
+            <p class="font-bold text-lg">Incorrect Answer!</p>
+        </div>
+        <p class="text-sm text-red-300 mt-1">Did you flip the sign when multiplying/dividing by a negative? For "and" take the overlap, for "or" take the union.</p>
+    </div>
+
+    <script>
+        // Deployed Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL =
+            'https://script.google.com/macros/s/AKfycbzwsoGzGxWxYBzqh179ktxMk5cYGosoMQlEYUolniMWE1tC5j-I3DROKgB_bgaJhNXwOw/exec';
+
+        const APP_VERSION = '1';
+        (function watchAppVersion() {
+            const file = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
+            const check = () => {
+                fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data[file] && data[file] !== APP_VERSION) location.reload();
+                    })
+                    .catch(() => {});
+            };
+            setInterval(check, 60000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') check();
+            });
+        })();
+
+        let studentProfile = null;
+        let badgeRecords = { level1: false, level2: false, level3: false };
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let currentQuestions = [];
+        let currentQuestionMode = 'mc';
+        let currentSets = [];    // Level 1 & 3: array of question sets (each set = array of parts)
+        let currentSetIndex = 0;
+        let activePart = null;   // the part currently being answered (for reflection / AI tutor)
+
+        // --- SCORE BOARD ---
+        const MARKS = {
+            1: { full: 10, perHeart: 1 },
+            2: { full: 10, perHeart: 1 },
+            3: { full: 20, perHeart: 1 }
+        };
+        const LEVEL_LIVES = { 1: 5, 2: 5, 3: 5 };
+        const NUM_QUESTIONS = 5;
+        // Level play-through flow: L1 = 3-part sets, L2 = single MC, L3 = 2-part sets
+        const LEVEL_FLOW = { 1: 'set', 2: 'mc', 3: 'set' };
+        let scoreTotals = { level1: 0, level2: 0, level3: 0 };
+
+        let levelStats = {
+            level1: { correct: 0, total: 0 },
+            level2: { correct: 0, total: 0 },
+            level3: { correct: 0, total: 0 }
+        };
+
+        // ─────────────────────────────────────────────────────────────────────
+        // MATH GENERATOR ENGINE — Ch. 17 Inequalities
+        //
+        // Level 2 (Paper 2 MC): sort_paper2.pdf Ch.17 Q287-304 (14 types)
+        //   Q288 Sample P2 Q9   "and" → x > a
+        //   Q294 16 P2 Q7       "and" → x < -7
+        //   Q298 20 P2 Q13      "and" → x > 5
+        //   Q289 PP P2 Q9       "or"  → disjoint union
+        //   Q290 12 P2 Q7       "or"  → single bound x < 4
+        //   Q295 17 P2 Q5       "or"  → disjoint union
+        //   Q299 21 P2 Q10      "or"  → single bound x < -2
+        //   Q302 23 P2 Q6       "or"  → x ≠ -2
+        //   Q303 24 P2 Q10      "or"  → single bound x ≤ -2
+        //   Q292 14 P2 Q7       chained → x > 3
+        //   Q301 22 P2 Q7       chained → -3 < y ≤ 2
+        //   Q304 25 P2 Q7       chained → y > 4
+        //   Q297 19 P2 Q7       "or"  → least integer
+        //   Q300 21 P2 Q37      discriminant → -4 ≤ k ≤ 8
+        //   (Q287 Sample P2 Q8 = figure/quadratic-graph type — EXCLUDED by design)
+        //
+        // Level 1 (revised P1, 2-part sets) & Level 3 (original P1, 2-part sets):
+        //   sort_paper1.pdf Ch.17 Q115-127 (13 sources)
+        // ─────────────────────────────────────────────────────────────────────
+        const MathGen = {
+            rand: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
+            shuffle: (array) => [...array].sort(() => Math.random() - 0.5),
+            gcd2: function (a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = a % b; a = b; b = t; } return a; },
+            // reduced fraction "n/d" (d > 0) or "n"
+            fr: function (n, d) {
+                if (d < 0) { n = -n; d = -d; }
+                const g = this.gcd2(Math.abs(n), Math.abs(d));
+                if (g > 1) { n = n / g; d = d / g; }
+                return d === 1 ? String(n) : n + '/' + d;
+            },
+            // "a x + b" with sign handling
+            lin: function (a, b, v) {
+                const sym = v || 'x';
+                const coef = (a === 1 ? '' : (a === -1 ? '-' : String(a))) + sym;
+                if (b === 0) return coef;
+                return coef + (b > 0 ? ' + ' + b : ' - ' + (-b));
+            },
+            // convert a plain inequality answer to TeX
+            tex: function (s) {
+                return String(s)
+                    .replace(/(-?)(\d+)\/(-?\d+)/g, '$1\\frac{$2}{$3}')
+                    .replace(/≤\s*/g, '\\le ')
+                    .replace(/≥\s*/g, '\\ge ')
+                    .replace(/≠\s*/g, '\\ne ')
+                    .replace(/ or /g, '\\ \\text{or}\\ ');
+            },
+            // convert a plain inequality STEM to inline TeX (fraction bars, ≤/≥, powers)
+            texIneq: function (s) {
+                return String(s)
+                    .replace(/(-?\d*)\(([^()]*)\)\/(-?\d+(?:\.\d+)?)/g, (m, coef, inner, den) =>
+                        (coef === '' || coef === '-')
+                            ? '\\frac{' + (coef === '-' ? '-' : '') + inner + '}{' + den + '}'
+                            : '\\frac{' + coef + '(' + inner + ')}{' + den + '}')
+                    .replace(/≤\s*/g, '\\le ')
+                    .replace(/≥\s*/g, '\\ge ')
+                    .replace(/≠\s*/g, '\\ne ')
+                    .replace(/²/g, '^2');
+            },
+            // wrap each side of a plain compound ("A and B" / "A or B") in $…$ TeX
+            texCompound: function (s) {
+                const joiner = s.indexOf(' and ') !== -1 ? ' and ' : ' or ';
+                return s.split(joiner).map(p => '$' + this.texIneq(p.trim()) + '$').join('&nbsp;' + joiner.trim() + '&nbsp;');
+            },
+            opts: function (texArr) { return this.shuffle(texArr.map(t => '$ ' + t + ' $')); },
+            // 4 distinct PLAIN TeX option strings starting from correct (callers wrap via opts())
+            texOpts: function (correct, cands) {
+                const out = [correct];
+                for (const c of cands) { if (out.length >= 4) break; if (out.indexOf(c) === -1) out.push(c); }
+                const pad = ['x > 0', 'x < 0', 'x > 1', 'x < 1', 'x > 2', 'x < 2', 'x > -1', 'x < -1', 'x > 5', 'x < 5'];
+                let i = 0;
+                while (out.length < 4) { const c = pad[i % pad.length]; i++; if (out.indexOf(c) === -1) out.push(c); }
+                return out;
+            },
+            intList: function (lo, hi) {
+                const arr = [];
+                for (let i = lo; i <= hi; i++) arr.push(i);
+                return arr.join(', ');
+            },
+
+            // ════════════ LEVEL 2 — Paper 2 MC (Q287-304) ════════════
+            generateL2: function (typeIdx) {
+                const t = typeIdx % 14;
+                let instruction = "Choose the correct solution:";
+                let text = '', raw = '', ansPlain = '', ansTex = '', optsPlain = [], src = '', law = 'isolate_x';
+
+                if (t === 0) {
+                    // Q288 (Sample P2 Q9): A - p x < B  and  q x + C > 0  → x > a
+                    const a = this.rand(1, 4);
+                    const p = [2, 3][this.rand(0, 1)];
+                    const A = this.rand(5, 9);
+                    const B = A - p * a;
+                    raw = `${A} - ${p}x < ${B} and 4x + 8 > 0`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x > ' + a; ansTex = 'x > ' + a;
+                    optsPlain = [ansTex, 'x > -2', 'x > ' + (a - 1), '-2 < x < ' + a];
+                    src = 'Sample P2 Q9'; law = 'intersect';
+                } else if (t === 1) {
+                    // Q294 (16 P2 Q7): -5x > A - 2x  and  6x - 18 < 0  → x < -A/3
+                    const A = [18, 21, 24][this.rand(0, 2)];
+                    const ans = this.fr(-A, 3);
+                    raw = `-5x > ${A} - 2x and 6x - 18 < 0`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x < ' + ans; ansTex = 'x < ' + ans;
+                    optsPlain = [ansTex, 'x < 3', ans + ' < x < 3', 'x < ' + ans + ' \\ \\text{or}\\ x > 3'];
+                    src = '16 P2 Q7'; law = 'intersect';
+                } else if (t === 2) {
+                    // Q298 (20 P2 Q13): (5 - x)/4 < 9  and  (2x - C)/7 > 1  → x > K
+                    const K = this.rand(4, 7);
+                    const C = 2 * K - 7;
+                    raw = `(5 - x)/4 < 9 and (2x - ${C})/7 > 1`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x > ' + K; ansTex = 'x > ' + K;
+                    optsPlain = [ansTex, 'x < -1', 'x > -1', 'x < ' + K];
+                    src = '20 P2 Q13'; law = 'intersect';
+                } else if (t === 3) {
+                    // Q289 (PP P2 Q9): "or" → disjoint union x < -A or x > B
+                    const pairs = [[2, -1], [3, -1], [3, -2], [4, -1], [4, -2]];
+                    const [A, B] = pairs[this.rand(0, pairs.length - 1)];
+                    raw = `(x - ${A})/2 > x or (x ${B >= 0 ? '+ ' + B : '- ' + (-B)})/2 < x`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = `x < ${-A} or x > ${B}`;
+                    ansTex = this.tex(ansPlain);
+                    optsPlain = [ansTex, 'x < ' + (-A), 'x > ' + B, 'x > ' + (-A)];
+                    src = 'PP P2 Q9'; law = 'union';
+                } else if (t === 4) {
+                    // Q290 (12 P2 Q7): 15 + 4x < 3  or  C - 2x > 1  → x < (C-1)/2
+                    const C = [9, 11, 13][this.rand(0, 2)];
+                    const K = (C - 1) / 2;
+                    raw = `15 + 4x < 3 or ${C} - 2x > 1`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x < ' + K; ansTex = 'x < ' + K;
+                    optsPlain = [ansTex, 'x < -3', 'x > -3', 'x > ' + K];
+                    src = '12 P2 Q7'; law = 'union';
+                } else if (t === 5) {
+                    // Q295 (17 P2 Q5): 6 - x < 2x - 3  or  7 - 3x > B  → x < L or x > 3
+                    const B = [1, 4, 7][this.rand(0, 2)];
+                    const L = (7 - B) / 3;
+                    raw = `6 - x < 2x - 3 or 7 - 3x > ${B}`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = `x < ${L} or x > 3`;
+                    ansTex = this.tex(ansPlain);
+                    optsPlain = [ansTex, 'x < ' + L, 'x > 3', L + ' < x < 3'];
+                    src = '17 P2 Q5'; law = 'union';
+                } else if (t === 6) {
+                    // Q299 (21 P2 Q10): 9x + 8 ≤ 4(x - 3)  or  6 - 7x > B  → x < (6-B)/7
+                    const B = [20, 27][this.rand(0, 1)];
+                    const K = (6 - B) / 7;
+                    raw = `9x + 8 ≤ 4(x - 3) or 6 - 7x > ${B}`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x < ' + K; ansTex = 'x < ' + K;
+                    optsPlain = [ansTex, 'x ≤ -4', 'x ≥ -4', 'x > ' + K];
+                    src = '21 P2 Q10'; law = 'union';
+                } else if (t === 7) {
+                    // Q302 (23 P2 Q6): x - 3 < B  or  (C - x)/4 < 2  → x ≠ K
+                    const K = [-2, -3, -1][this.rand(0, 2)];
+                    const B = K - 3, C = K + 8;
+                    raw = `x - 3 < ${B} or (${C} - x)/4 < 2`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x ≠ ' + K; ansTex = this.tex(ansPlain);
+                    optsPlain = [ansTex, 'x < ' + K, 'x > ' + K, 'x = ' + K];
+                    src = '23 P2 Q6'; law = 'union';
+                } else if (t === 8) {
+                    // Q303 (24 P2 Q10): (1 - x)/2 ≥ 4  or  7 + 5x ≤ B  → x ≤ (B-7)/5
+                    const B = [-3, -8, -13][this.rand(0, 2)];
+                    const K = (B - 7) / 5;
+                    raw = `(1 - x)/2 ≥ 4 or 7 + 5x ≤ ${B}`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x ≤ ' + K; ansTex = this.tex(ansPlain);
+                    optsPlain = [ansTex, 'x ≤ -7', '-7 ≤ x ≤ ' + K, 'x ≥ -2'];
+                    src = '24 P2 Q10'; law = 'union';
+                } else if (t === 9) {
+                    // Q292 (14 P2 Q7): -3x < B < 2x  → x > B/2
+                    const B = [4, 6, 8, 10][this.rand(0, 3)];
+                    const K = B / 2;
+                    const negThird = this.fr(-B, 3);
+                    raw = `-3x < ${B} < 2x`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'x > ' + K; ansTex = 'x > ' + K;
+                    optsPlain = [ansTex, 'x > ' + negThird, 'x > 0', negThird + ' < x < ' + K];
+                    src = '14 P2 Q7'; law = 'chained_split';
+                } else if (t === 10) {
+                    // Q301 (22 P2 Q7): 3y - 5 < 5y + 1 ≤ C  → -3 < y ≤ (C-1)/5
+                    const C = [11, 16, 21][this.rand(0, 2)];
+                    const U = (C - 1) / 5;
+                    raw = `3y - 5 < 5y + 1 ≤ ${C}`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = `-3 < y ≤ ${U}`; ansTex = this.tex(ansPlain);
+                    optsPlain = [ansTex, `-3 ≤ y < ${U}`, `-2 < y ≤ ${U + 1}`, `-2 ≤ y < ${U + 1}`];
+                    src = '22 P2 Q7'; law = 'chained_split';
+                } else if (t === 11) {
+                    // Q304 (25 P2 Q7): 4y + 1 < 5y - A ≤ 8y - B  → y > 1+A
+                    const pairs = [[3, 9], [2, 7], [3, 10]];
+                    const [A, B] = pairs[this.rand(0, pairs.length - 1)];
+                    const K = 1 + A;
+                    const R = this.fr(B - A, 3);
+                    raw = `4y + 1 < 5y - ${A} ≤ 8y - ${B}`;
+                    text = `The solution of&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = 'y > ' + K; ansTex = 'y > ' + K;
+                    optsPlain = [ansTex, 'y ≥ ' + K, 'y > ' + R, 'y < ' + K];
+                    src = '25 P2 Q7'; law = 'chained_split';
+                } else if (t === 12) {
+                    // Q297 (19 P2 Q7): -2(x - 5) + 5 < 21  or  (3x - 5)/7 > 1  → least integer = -2
+                    // Parameterised: -2(x - h) + k < C  →  x > a ;  (3x - q)/7 > 1  →  x > b (= a + 4)
+                    const a = this.rand(-4, -1);
+                    const h = this.rand(3, 6);
+                    const k = [3, 5, 7][this.rand(0, 2)];
+                    const C = 2 * h + k - 2 * a;
+                    const b = a + 4;
+                    const q = 3 * b - 7;
+                    raw = `-2(x - ${h}) + ${k} < ${C} or (${this.lin(3, -q)})/7 > 1`;
+                    text = `The least integer satisfying the compound inequality&nbsp;${this.texCompound(raw)}&nbsp;is`;
+                    ansPlain = String(a + 1); ansTex = String(a + 1);
+                    optsPlain = [String(a + 1), String(a), String(b + 1), String(b)];
+                    src = '19 P2 Q7'; law = 'union';
+                } else {
+                    // Q300 (21 P2 Q37): x² + kx + k + c ≥ 0 for all x  → -a ≤ k ≤ b (b = a+4)
+                    instruction = "Choose the correct answer:";
+                    const pairs = [[2, 3], [4, 8], [6, 15]];   // [a, c]
+                    const [a, c] = pairs[this.rand(0, pairs.length - 1)];
+                    const b = a + 4;
+                    raw = `x^2 + kx + k + ${c} ≥ 0`;
+                    text = `Let k be a constant. Find the range of values of k such that $x^2 + kx + k + ${c} \\ge 0$ for any real number x.`;
+                    ansPlain = `${-a} ≤ k ≤ ${b}`; ansTex = this.tex(ansPlain);
+                    optsPlain = [
+                        ansTex,
+                        `${-b} ≤ k ≤ ${a}`,
+                        `k ≤ ${-a} \\ \\text{or}\\ k ≥ ${b}`,
+                        `k ≤ ${-b} \\ \\text{or}\\ k ≥ ${a}`
+                    ];
+                    src = '21 P2 Q37'; law = 'discriminant';
+                }
+
+                const optsTex = optsPlain.map(o => this.tex(o));
+                return {
+                    instruction, paper: 'Paper 2', src,
+                    text, raw, answerStr: ansPlain, mcAnswerStr: optsTex[0],
+                    options: this.opts(this.texOpts(optsTex[0], optsTex.slice(1))),
+                    firstStepLaw: law
+                };
+            },
+
+            // ════════════ PAPER 1 SOURCE BUILDERS (Q115-127) ════════════
+            // Each returns { src, join, var, ineq1, ineq2, sol1, sol2, compound,
+            //                 compoundQ, law1, law2, lawCompound,
+            //                 followQ, followAns, followAccept, followLaw }
+            s0: function () {
+                // Q115 (12 P1 Q6): (4x+P)/7 > 2(x-Q)  and  2x-R ≤ 0  → x < n/5
+                const Q = this.rand(2, 4);
+                const n = [19, 21, 22, 23, 24, 26, 27, 28, 29][this.rand(0, 8)];
+                const P = 2 * n - 14 * Q;
+                const R = 2 * (Math.floor(n / 5) + 1);
+                const ineq1 = `(${this.lin(4, P)})/7 > 2(x - ${Q})`;
+                const ineq2 = `2x - ${R} ≤ 0`;
+                const sol1 = 'x < ' + this.fr(n, 5);
+                const sol2 = 'x ≤ ' + this.fr(R, 2);
+                const compound = sol1;
+                const followAns = String(Math.floor(n / 5));
+                return {
+                    src: '12 P1 Q6', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ: 'How many positive integers satisfy both the inequalities in (a)?',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s1: function () {
+                // Q116 (13 P1 Q5): (19-7x)/3 > B-5x  and  18-2x ≥ 0  → n/8 < x ≤ 9  (list follow-up)
+                const n = [41, 44, 47, 50][this.rand(0, 3)];
+                const B = (n + 19) / 3;
+                const ineq1 = `(19 - 7x)/3 > ${B} - 5x`;
+                const ineq2 = `18 - 2x ≥ 0`;
+                const sol1 = 'x > ' + this.fr(n, 8);
+                const sol2 = 'x ≤ 9';
+                const compound = `${this.fr(n, 8)} < x ≤ 9`;
+                const lo = Math.ceil(n / 8);
+                const followAns = this.intList(lo, 9);
+                return {
+                    src: '13 P1 Q5', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'flip_sign', lawCompound: 'intersect',
+                    followQ: 'Find all integers which satisfy both inequalities in (a).',
+                    followAns, followAccept: [followAns, followAns.replace(/, /g, ',')], followLaw: 'count_integers'
+                };
+            },
+            s2: function () {
+                // Q117 (15 P1 Q5): (7-3x)/5 ≤ 2(x+2)  and  4x-M > 0  → x > M/4
+                const M = [9, 13, 17, 21][this.rand(0, 3)];
+                const ineq1 = `(7 - 3x)/5 ≤ 2(x + 2)`;
+                const ineq2 = `4x - ${M} > 0`;
+                const sol1 = 'x ≥ -1';
+                const sol2 = 'x > ' + this.fr(M, 4);
+                const compound = sol2;
+                const followAns = String(Math.ceil(M / 4));
+                return {
+                    src: '15 P1 Q5', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ: 'Write down the least integer which satisfies both inequalities in (a).',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s3: function () {
+                // Q118 (16 P1 Q6): "or" compound → disjoint union x ≤ C or x > K (K > C)
+                // ineq1 "x + A < 6(x + B)" → x > K; ineq2 "p x + 5p ≤ 0" → x ≤ -5
+                const B = this.rand(2, 4);
+                const C = -5, K = -2;
+                const A = 6 * B - 10;   // (A - 6B)/5 = -2 = K
+                const p = this.rand(2, 4);
+                const ineq1 = `x + ${A} < 6(x + ${B})`;
+                const ineq2 = `${this.lin(p, 5 * p)} ≤ 0`;
+                const sol1 = 'x > ' + K;
+                const sol2 = 'x ≤ ' + C;
+                const compound = `x ≤ ${C} or x > ${K}`;
+                return {
+                    src: '16 P1 Q6', join: 'or', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Solve the compound inequality ${ineq1} or ${ineq2}.`,
+                    law1: 'isolate_x', law2: 'isolate_x', lawCompound: 'union',
+                    followQ: 'Write down the greatest negative integer satisfying the compound inequality.',
+                    followAns: '-1', followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s4: function () {
+                // Q119 (17 P1 Q5): 7(x-2) ≤ (11x+8)/3  and  6-x < C  → (6-C) < x ≤ 5
+                const C = [4, 5, 6][this.rand(0, 2)];
+                const ineq1 = `7(x - 2) ≤ (11x + 8)/3`;
+                const ineq2 = `6 - x < ${C}`;
+                const sol1 = 'x ≤ 5';
+                const sol2 = 'x > ' + (6 - C);
+                const compound = `${6 - C} < x ≤ 5`;
+                const followAns = String(C - 1);
+                return {
+                    src: '17 P1 Q5', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'flip_sign', lawCompound: 'intersect',
+                    followQ: 'How many integers satisfy both the inequalities in (a)?',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s5: function () {
+                // Q120 (18 P1 Q6): (3-x)/2 > 2x+B  and  x+8 ≥ 0  → -8 ≤ x < (3-2B)/5
+                const B = [6, 7, 8][this.rand(0, 2)];
+                const ineq1 = `(3 - x)/2 > 2x + ${B}`;
+                const ineq2 = `x + 8 ≥ 0`;
+                const sol1 = 'x < ' + this.fr(3 - 2 * B, 5);
+                const sol2 = 'x ≥ -8';
+                const compound = `-8 ≤ x < ${this.fr(3 - 2 * B, 5)}`;
+                const followAns = String(Math.floor((3 - 2 * B) / 5));
+                return {
+                    src: '18 P1 Q6', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ: 'Write down the greatest integer which satisfies both inequalities in (a).',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s6: function () {
+                // Q121 (19 P1 Q6): (7x+A)/4 ≤ 2(3x-B)  and  C-5x ≥ 0  → 2 ≤ x ≤ C/5
+                const B = [1, 2, 3][this.rand(0, 2)];
+                const A = 34 - 8 * B;
+                const C = [25, 35, 45][this.rand(0, 2)];
+                const ineq1 = `(${this.lin(7, A)})/4 ≤ 2(3x - ${B})`;
+                const ineq2 = `${C} - 5x ≥ 0`;
+                const sol1 = 'x ≥ 2';
+                const sol2 = 'x ≤ ' + (C / 5);
+                const compound = `2 ≤ x ≤ ${C / 5}`;
+                const followAns = String(C / 5 - 1);
+                return {
+                    src: '19 P1 Q6', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'flip_sign', lawCompound: 'intersect',
+                    followQ: `Find the number of integers satisfying both inequalities&nbsp;$${this.texIneq(ineq1)}$&nbsp;and&nbsp;$${this.texIneq(ineq2)}$.`,
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s7: function () {
+                // Q122 (20 P1 Q6): 3-x > (A-x)/2  or  5+x > 4  → x ≠ (6-A)
+                const A = [7, 8, 9][this.rand(0, 2)];
+                const B = A - 2;
+                const bound = 6 - A;
+                const ineq1 = `3 - x > (${A} - x)/2`;
+                const ineq2 = `${B} + x > 4`;
+                const sol1 = 'x < ' + bound;
+                const sol2 = 'x > ' + bound;
+                const compound = 'x ≠ ' + bound;
+                const followAns = (bound === -1) ? '-2' : '-1';
+                return {
+                    src: '20 P1 Q6', join: 'or', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Solve the compound inequality ${ineq1} or ${ineq2}.`,
+                    law1: 'flip_sign', law2: 'isolate_x', lawCompound: 'union',
+                    followQ: 'Write down the greatest negative integer satisfying the compound inequality.',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s8: function () {
+                // Q123 (21 P1 Q4): 7(x-2)/5 + 11 > 3(x-1)  and  x+B ≥ 0  → -B ≤ x < 7
+                const B = [3, 4, 5][this.rand(0, 2)];
+                const ineq1 = `7(x - 2)/5 + 11 > 3(x - 1)`;
+                const ineq2 = `x + ${B} ≥ 0`;
+                const sol1 = 'x < 7';
+                const sol2 = 'x ≥ ' + (-B);
+                const compound = `${-B} ≤ x < 7`;
+                const followAns = '6';
+                return {
+                    src: '21 P1 Q4', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ: 'How many positive integers satisfy both the inequalities in (a)?',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s9: function () {
+                // Q124 (22 P1 Q6): -2(3x+A) > x+B  or  2x ≤ -C  → x < -2
+                const A = [2, 3, 4][this.rand(0, 2)];
+                const B = 14 - 2 * A;
+                const C = [6, 8, 10][this.rand(0, 2)];
+                const ineq1 = `-2(3x + ${A}) > x + ${B}`;
+                const ineq2 = `2x ≤ -${C}`;
+                const sol1 = 'x < -2';
+                const sol2 = 'x ≤ ' + (-C / 2);
+                const compound = 'x < -2';
+                return {
+                    src: '22 P1 Q6', join: 'or', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Solve the compound inequality ${ineq1} or ${ineq2}.`,
+                    law1: 'flip_sign', law2: 'flip_sign', lawCompound: 'union',
+                    followQ: 'Write down the greatest integer satisfying the compound inequality.',
+                    followAns: '-3', followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s10: function () {
+                // Q125 (23 P1 Q4): 3x+A > (4x-B)/2  and  3x-C < D  → -n/2 < x < 3  (golden example)
+                const A = [1, 2, 3][this.rand(0, 2)];
+                const B = [3, 5, 7][this.rand(0, 2)];
+                const n = B + 2 * A;
+                const C = [1, 2, 3][this.rand(0, 2)];
+                const D = 9 - C;
+                const ineq1 = `3x + ${A} > (4x - ${B})/2`;
+                const ineq2 = `3x - ${C} < ${D}`;
+                const sol1 = 'x > ' + this.fr(-n, 2);
+                const sol2 = 'x < 3';
+                const compound = `${this.fr(-n, 2)} < x < 3`;
+                const followAns = String(Math.floor(n / 2));
+                return {
+                    src: '23 P1 Q4', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ: 'How many negative integers satisfy both the inequalities in (a)?',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s11: function () {
+                // Q126 (24 P1 Q4): (5x+A)/4 < 2x-B  and  3x+9 ≥ 0  → x > (A+4B)/3
+                const A = [5, 7, 9][this.rand(0, 2)];
+                const B = [1, 2][this.rand(0, 1)];
+                const num = A + 4 * B;
+                const ineq1 = `(${this.lin(5, A)})/4 < 2x - ${B}`;
+                const ineq2 = `3x + 9 ≥ 0`;
+                const sol1 = 'x > ' + this.fr(num, 3);
+                const sol2 = 'x ≥ -3';
+                const compound = sol1;
+                const followAns = String(Math.floor(num / 3) + 1);
+                return {
+                    src: '24 P1 Q4', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ: 'Write down the least integer which satisfies both inequalities in (a).',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+            s12: function () {
+                // Q127 (25 P1 Q6): (6x+A)/2 < x-B  or  3x ≤ -21  → x < -(2B+A)/4
+                const A = [1, 3][this.rand(0, 1)];
+                const B = [6, 8, 10][this.rand(0, 2)];
+                const num = 2 * B + A;
+                const ineq1 = `(${this.lin(6, A)})/2 < x - ${B}`;
+                const ineq2 = `3x ≤ -21`;
+                const sol1 = 'x < ' + this.fr(-num, 4);
+                const sol2 = 'x ≤ -7';
+                const compound = sol1;
+                const followAns = String(Math.floor(-num / 4));
+                return {
+                    src: '25 P1 Q6', join: 'or', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Solve the compound inequality ${ineq1} or ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'flip_sign', lawCompound: 'union',
+                    followQ: 'Write down the greatest integer satisfying the compound inequality.',
+                    followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+
+            SRC_FNS: ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12'],
+            L1_IDX: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],   // Q117 (s2) is L3-only per spec
+
+            part: function (qHtml, answerStr, mcTex, optsTex, law, marks, acceptList, raw) {
+                return {
+                    qHtml, answerStr, mcAnswerStr: mcTex,
+                    acceptList: acceptList || undefined,
+                    options: this.opts(optsTex),
+                    firstStepLaw: law, marks, raw
+                };
+            },
+
+            // ════════════ LEVEL 1 — TSA 3A03 (2021-2025 S3 TSA Q&A, pp. 8–11, Q39–59) ════════════
+            // Figure items Q60–66 (number-line diagrams) are excluded.
+            tsaNum: function (s) {
+                const t = this.tex(String(s));
+                return t.indexOf('\\frac') !== -1 || t.indexOf('\\le') !== -1 ? t : String(s);
+            },
+            tsaCmp: function () {
+                let left, right, lv, rv, src;
+                if (this.rand(0, 1) === 0) {
+                    const n = this.rand(1, 4), d = this.rand(n + 1, n + 6);
+                    const dec = this.rand(1, 9);
+                    left = '-' + n + '/' + d; right = '-' + (dec / 10);
+                    lv = -n / d; rv = -dec / 10;
+                    src = 'TSA 21 Q39';
+                } else {
+                    const n = this.rand(5, 15), a = this.rand(2, 8), b = a + this.rand(1, 4);
+                    left = n + '/' + a; right = n + '/' + b;
+                    lv = n / a; rv = n / b;
+                    src = 'TSA 22 Q40';
+                }
+                if (Math.abs(lv - rv) < 1e-9) return this.tsaCmp();
+                const ans = lv > rv ? '>' : '<';
+                const qHtml = `Fill in the box with &gt; or &lt; to express the relation between the numbers.&nbsp;$${this.tex(left)}$&nbsp;□&nbsp;$${this.tex(right)}$`;
+                const p = this.part(qHtml, ans, ans, this.texOpts(ans, ['>', '<', '≥', '≤']), 'compare', 1, null, 'cmp:' + left + ':' + right);
+                p.mode = 'fill'; p.paper = 'TSA'; p.src = src;
+                return [p];
+            },
+            tsaProp: function () {
+                const rels = ['<', '>', '≤', '≥'];
+                const rel = rels[this.rand(0, 3)];
+                const flip = { '<': '>', '>': '<', '≤': '≥', '≥': '≤' };
+                const k = [3, 5, 6, 7, 8][this.rand(0, 4)];
+                const fr = flip[rel];
+                const correct = `-${k}x ${fr} -${k}y`;
+                const wrongs = [`${k}x ${fr} ${k}y`, `x + ${k} ${fr} y + ${k}`, `x - ${k} ${fr} y - ${k}`, `-${k}x ${rel} -${k}y`];
+                const years = { '<': 'TSA 21 Q41', '>': 'TSA 22 Q42', '≤': 'TSA 23 Q43', '≥': 'TSA 24 Q45' };
+                const qHtml = `If&nbsp;$x ${rel === '≤' ? '\\le' : rel === '≥' ? '\\ge' : rel} y$, which of the following inequalities MUST be correct?`;
+                const cTex = this.texIneq(correct);
+                const wTex = wrongs.map(w => this.texIneq(w)).filter(w => w !== cTex);
+                const p = this.part(qHtml, correct, cTex, this.texOpts(cTex, wTex), 'flip_sign', 1, null, 'prop:' + rel + ':' + k);
+                p.mode = 'mc'; p.paper = 'TSA'; p.src = years[rel];
+                return [p];
+            },
+            tsaCannot: function () {
+                const kind = this.rand(0, 2);
+                const a = this.rand(-8, 6);
+                let rel, bad, goods, src;
+                if (kind === 0) { rel = '≥'; bad = a - 1; goods = [a, a + 1, a + 2]; src = 'TSA 23 Q44'; }
+                else if (kind === 1) { rel = '≤'; bad = a + 1; goods = [a, a - 1, a - 2]; src = 'TSA 24 Q46'; }
+                else { rel = '>'; bad = a - 1; goods = [a + 1, a + 2, a + 3]; src = 'TSA 25 Q48'; }
+                const sym = rel === '≥' ? '\\ge' : rel === '≤' ? '\\le' : rel;
+                const qHtml = `If&nbsp;$x ${sym} ${a}$, which of the following CANNOT be a value of&nbsp;$x$?`;
+                const ans = String(bad);
+                const opts = [ans, ...goods.map(String)];
+                const p = this.part(qHtml, ans, ans, this.texOpts(ans, opts.slice(1)), 'compare', 1, null, 'cannot:' + rel + ':' + a + ':' + bad);
+                p.mode = 'mc'; p.paper = 'TSA'; p.src = src;
+                return [p];
+            },
+            tsaWord: function () {
+                const t = this.rand(0, 5);
+                let qHtml, correct, wrongs, src, raw;
+                if (t === 0) {
+                    const m = [2, 3, 4][this.rand(0, 2)], H = [40, 50, 60][this.rand(0, 2)];
+                    qHtml = `Carmen spent&nbsp;$x$&nbsp;hours practising piano last week. Her practising time this week was ${m} times that of last week. If her total practising time in these two weeks was less than ${H} hours, which inequality can be used to find the range of values of&nbsp;$x$?`;
+                    correct = `x + ${m}x < ${H}`;
+                    wrongs = [`x + ${m}x ≤ ${H}`, `x + ${m}x > ${H}`, `x + x/${m} < ${H}`];
+                    src = 'TSA 21 Q49'; raw = 'word:piano';
+                } else if (t === 1) {
+                    const D = [20, 30, 50, 60][this.rand(0, 3)];
+                    qHtml = `A supermarket distributed&nbsp;$x$&nbsp;stamps last week and&nbsp;$y$&nbsp;stamps this week. At least ${D} more stamps were distributed this week than last week. Which inequality represents the relationship between&nbsp;$x$&nbsp;and&nbsp;$y$?`;
+                    correct = `y - x ≥ ${D}`;
+                    wrongs = [`y - x > ${D}`, `y - x ≤ ${D}`, `y - x < ${D}`];
+                    src = 'TSA 21 Q50'; raw = 'word:stamps';
+                } else if (t === 2) {
+                    const k = [2, 3][this.rand(0, 1)], T = [360000, 400000, 480000][this.rand(0, 2)];
+                    qHtml = `The monthly salary of Alice is&nbsp;$x$&nbsp;dollars. The monthly salary of Fanny is ${k} times that of Alice. If the total of their annual salary is more than ${T} dollars, which inequality can be used to find the range of values of&nbsp;$x$?`;
+                    correct = `12(x + ${k}x) > ${T}`;
+                    wrongs = [`12(x + ${k}x) ≥ ${T}`, `12(x + ${k}x) < ${T}`, `x + ${k}x > ${T}`];
+                    src = 'TSA 22 Q51'; raw = 'word:salary';
+                } else if (t === 3) {
+                    const W = [600, 750, 900][this.rand(0, 2)];
+                    qHtml = `One pack of lollipops weighs&nbsp;$x$&nbsp;g. A pack of chocolate weighs half of that. Susan has 3 packs of lollipops and 4 packs of chocolate. The total weight does not exceed ${W} g. Which inequality can be used to find the range of values of&nbsp;$x$?`;
+                    correct = `3x + 4(x/2) ≤ ${W}`;
+                    wrongs = [`3x + 4(x/2) < ${W}`, `3x + 4(x/2) > ${W}`, `3x + 4(x/2) ≥ ${W}`];
+                    src = 'TSA 23 Q52'; raw = 'word:candy';
+                } else if (t === 4) {
+                    const w = [10, 15, 20][this.rand(0, 2)], P = [160, 200, 240][this.rand(0, 2)];
+                    qHtml = `The length of a rectangle is&nbsp;$x$&nbsp;cm and its width is ${w} cm. If the perimeter does not exceed ${P} cm, which inequality can be used to find the range of values of&nbsp;$x$?`;
+                    correct = `2(x + ${w}) ≤ ${P}`;
+                    wrongs = [`2(x + ${w}) < ${P}`, `2(x + ${w}) > ${P}`, `2(x + ${w}) ≥ ${P}`];
+                    src = 'TSA 24 Q53'; raw = 'word:rect';
+                } else {
+                    const R = [300, 450, 600][this.rand(0, 2)], I = [2000, 2500][this.rand(0, 1)];
+                    qHtml = `The marked price of a laptop was&nbsp;$m$&nbsp;dollars, reduced by ${R} dollars for selling. John paid in 6 instalments. Each instalment was at most ${I} dollars. Which inequality can be used to find the range of values of&nbsp;$m$?`;
+                    correct = `m - ${R} ≤ ${6 * I}`;
+                    wrongs = [`m - ${R} < ${6 * I}`, `6(m - ${R}) ≤ ${I}`, `6(m - ${R}) < ${I}`];
+                    src = 'TSA 25 Q54'; raw = 'word:laptop';
+                }
+                const cTex = this.texIneq(correct);
+                const wTex = wrongs.map(w => this.texIneq(w));
+                const p = this.part(qHtml, correct, cTex, this.texOpts(cTex, wTex), 'isolate_x', 1, null, raw + ':' + correct);
+                p.mode = 'mc'; p.paper = 'TSA'; p.src = src;
+                return [p];
+            },
+            tsaSolve: function () {
+                const t = this.rand(0, 4);
+                let ineq, sol, src, law;
+                if (t === 0) {
+                    const a = [2, 3, 4][this.rand(0, 2)];
+                    const x = this.rand(-6, -1);
+                    const c = this.rand(1, 9);
+                    const rhs = c - a * x;
+                    ineq = `${c} - ${a}x ≥ ${rhs}`;
+                    sol = 'x ≤ ' + x;
+                    src = 'TSA 21 Q55'; law = 'flip_sign';
+                } else if (t === 1) {
+                    const a = [3, 4, 5][this.rand(0, 2)];
+                    const x = this.rand(2, 8);
+                    ineq = `${a}x ≤ x + ${(a - 1) * x}`;
+                    sol = 'x ≤ ' + x;
+                    src = 'TSA 22 Q56'; law = 'isolate_x';
+                } else if (t === 2) {
+                    const a = [2, 3, 4][this.rand(0, 2)];
+                    const x = this.rand(-5, -1);
+                    const b = this.rand(1, 9);
+                    ineq = `${a}x + ${b} < ${a * x + b}`;
+                    sol = 'x < ' + x;
+                    src = 'TSA 23 Q57'; law = 'isolate_x';
+                } else if (t === 3) {
+                    const a = [2, 3, 4][this.rand(0, 2)];
+                    const x = this.rand(-6, -1);
+                    ineq = `${a}x ≤ ${a * x}`;
+                    sol = 'x ≤ ' + x;
+                    src = 'TSA 24 Q58'; law = 'isolate_x';
+                } else {
+                    const a = [2, 3, 4][this.rand(0, 2)];
+                    const x = this.rand(-6, -1);
+                    const b = this.rand(1, 9);
+                    const rhs = b - a * x;
+                    ineq = `-${a}x + ${b} ≤ ${rhs}`;
+                    sol = 'x ≥ ' + x;
+                    src = 'TSA 25 Q59'; law = 'flip_sign';
+                }
+                const qHtml = `Solve the inequality&nbsp;$${this.texIneq(ineq)}$.`;
+                const p = this.part(qHtml, sol, this.tex(sol), this.texOpts(this.tex(sol), []), law, 1, null, ineq);
+                p.mode = 'fill'; p.paper = 'TSA'; p.src = src;
+                return [p];
+            },
+            generateTSA: function () {
+                const k = this.rand(0, 4);
+                if (k === 0) return this.tsaCmp();
+                if (k === 1) return this.tsaProp();
+                if (k === 2) return this.tsaCannot();
+                if (k === 3) return this.tsaWord();
+                return this.tsaSolve();
+            },
+
+            // ════════════ LEVEL 1 — TSA 3A03 + revised Paper 1 (2-part sets) ════════════
+            generateL1Set: function () {
+                if (this.rand(0, 4) < 3) return this.generateTSA();
+                const idx = this.L1_IDX[this.rand(0, this.L1_IDX.length - 1)];
+                const s = this[this.SRC_FNS[idx]]();
+                const parts = [
+                    this.part(`Solve the inequality&nbsp;$${this.texIneq(s.ineq1)}$.`, s.sol1, this.tex(s.sol1), this.texOpts(this.tex(s.sol1), []), s.law1, 1, null, s.ineq1),
+                    this.part(`Solve the inequality&nbsp;$${this.texIneq(s.ineq2)}$.`, s.sol2, this.tex(s.sol2), this.texOpts(this.tex(s.sol2), []), s.law2, 1, null, s.ineq2)
+                ];
+                parts.forEach(p => { p.src = s.src; p.mode = 'fill'; p.paper = 'Paper 1'; });
+                return parts;
+            },
+
+            // ════════════ LEVEL 3 — original Paper 1 (2-part sets) ════════════
+            generateL3Set: function () {
+                const idx = this.rand(0, this.SRC_FNS.length - 1);
+                const s = this[this.SRC_FNS[idx]]();
+                const rawC = s.join === 'and' ? `${s.ineq1} and ${s.ineq2}` : `${s.ineq1} or ${s.ineq2}`;
+                const aText = s.join === 'and'
+                    ? `Find the range of values of x which satisfy both&nbsp;${this.texCompound(rawC)}.`
+                    : `Solve the compound inequality&nbsp;${this.texCompound(rawC)}.`;
+                const parts = [
+                    this.part(aText, s.compound, this.tex(s.compound), this.texOpts(this.tex(s.compound), []), s.lawCompound, 2, null, rawC),
+                    this.part(s.followQ, s.followAns, this.tex(s.followAns), this.texOpts(this.tex(s.followAns), []), s.followLaw, 2, s.followAccept, s.followAns)
+                ];
+                parts.forEach(p => p.src = s.src);
+                return parts;
+            },
+
+            // ════════════ END OF GENERATORS ════════════
+        };
+
+        // --- INEQUALITY ANSWER CHECKING (canonicalization) ---
+        function normIneq(s) {
+            return String(s).toLowerCase()
+                .replace(/−/g, '-')
+                .replace(/\*/g, '')
+                .replace(/[ \t]+/g, '')
+                .replace(/≧/g, '≥').replace(/≦/g, '≤')
+                .replace(/>=/g, '≥').replace(/<=/g, '≤')
+                .replace(/!=/g, '≠').replace(/<>/g, '≠')
+                // strip wrapping parens around a (negative) fraction: x > -(9/2) → x > -9/2
+                .replace(/\((-?\d+(?:\/-?\d+)?)\)/g, '$1')
+                // expand "x ≠ a" into a union "x<a or x>a"
+                .replace(/([xyk])?≠(-?(?:\d+\.?\d*|\d*\.?\d+)(?:\/-?\d+)?)/g, (m, v, num) => v + '<' + num + 'or' + v + '>' + num);
+        }
+
+        function numVal(tok) {
+            if (tok.indexOf('/') !== -1) {
+                const parts = tok.split('/');
+                const dn = parseFloat(parts[1]);
+                if (!isFinite(dn) || dn === 0) return NaN;
+                return parseFloat(parts[0]) / dn;
+            }
+            return parseFloat(tok);
+        }
+
+        function flipOp(op) {
+            if (op === '<') return '>';
+            if (op === '>') return '<';
+            if (op === '≤') return '≥';
+            if (op === '≥') return '≤';
+            return op;
+        }
+
+        // Parse a normalized inequality solution into { joiner, constraints:[{op,b}] } (or null).
+        function parseSolution(s) {
+            if (/[xyk]/.test(s) === false) return null;   // not an inequality (numeric / list)
+            let joiner = /or|\|/.test(s) ? 'or' : 'and';
+            const parts = s.split(/or|and|\||,|;/).filter(Boolean);
+            const constraints = [];
+            for (let part of parts) {
+                const nums = [...part.matchAll(/(-?(?:\d+\.?\d*|\d*\.?\d+)(?:\/-?\d+)?)/g)].map(m => m[0]);
+                const ops = [...part.matchAll(/([<>≥≤])/g)].map(m => m[1]);
+                const vars = [...part.matchAll(/([xyk])/g)].map(m => m[1]);
+                if (vars.length === 0) return null;
+                if (ops.length === 1 && nums.length === 1 && vars.length === 1) {
+                    const b = numVal(nums[0]);
+                    const vIdx = part.indexOf(vars[0]);
+                    const oIdx = part.indexOf(ops[0]);
+                    constraints.push(vIdx < oIdx ? { op: ops[0], b } : { op: flipOp(ops[0]), b });
+                } else if (ops.length === 2 && nums.length === 2 && vars.length === 1) {
+                    const b1 = numVal(nums[0]), b2 = numVal(nums[1]);
+                    constraints.push({ op: flipOp(ops[0]), b: b1 });
+                    constraints.push({ op: ops[1], b: b2 });
+                } else {
+                    return null;
+                }
+            }
+            // comma-separated disjoint union: one lower + one upper bound with lo > hi → "or"
+            if (joiner === 'and' && constraints.length === 2) {
+                const lo = constraints.find(c => c.op === '>' || c.op === '≥');
+                const hi = constraints.find(c => c.op === '<' || c.op === '≤');
+                if (lo && hi && lo.b > hi.b) joiner = 'or';
+            }
+            return { joiner, constraints };
+        }
+
+        // Drop dominated bounds so single bounds ≡ collapsed compounds.
+        function reduceSol(sol) {
+            if (!sol || !sol.constraints || !sol.constraints.length) return sol;
+            let lo = null, hi = null;
+            for (const c of sol.constraints) {
+                const isLower = (c.op === '>' || c.op === '≥');
+                if (sol.joiner === 'and') {
+                    if (isLower) { if (!lo || c.b > lo.b) lo = c; }
+                    else { if (!hi || c.b < hi.b) hi = c; }
+                } else {
+                    if (isLower) { if (!lo || c.b < lo.b) lo = c; }
+                    else { if (!hi || c.b > hi.b) hi = c; }
+                }
+            }
+            const out = []; if (lo) out.push(lo); if (hi) out.push(hi);
+            if (out.length === 1) return { joiner: 'and', constraints: out };
+            return { joiner: sol.joiner, constraints: out };
+        }
+
+        function solutionsEqual(a, b) {
+            a = reduceSol(a); b = reduceSol(b);
+            if (!a || !b) return false;
+            if (a.joiner !== b.joiner) return false;
+            if (a.constraints.length !== b.constraints.length) return false;
+            const used = new Array(b.constraints.length).fill(false);
+            for (const ca of a.constraints) {
+                let found = false;
+                for (let i = 0; i < b.constraints.length; i++) {
+                    if (used[i]) continue;
+                    const cb = b.constraints[i];
+                    if (ca.op === cb.op && Math.abs(ca.b - cb.b) < 1e-9) { used[i] = true; found = true; break; }
+                }
+                if (!found) return false;
+            }
+            return true;
+        }
+
+        function checkFillAnswer(cleanInput, q) {
+            const acc = q.acceptList || [q.answerStr];
+            const ni = normIneq(cleanInput);
+            const pi = parseSolution(ni);
+            for (const a of acc) {
+                const na = normIneq(a);
+                if (ni === na) return true;
+                const pa = parseSolution(na);
+                if (pi && pa && solutionsEqual(pi, pa)) return true;
+                if (/^-?\d+(\.\d+)?$/.test(ni) && /^-?\d+(\.\d+)?$/.test(na) &&
+                    Math.abs(parseFloat(ni) - parseFloat(na)) < 1e-9) return true;
+                if (ni.indexOf(',') !== -1 || na.indexOf(',') !== -1) {
+                    const la = ni.split(',').map(t => numVal(t));
+                    const lb = na.split(',').map(t => numVal(t));
+                    if (la.length === lb.length && la.length > 0 && !la.some(x => isNaN(x)) && !lb.some(x => isNaN(x))) {
+                        const sa = la.slice().sort((x, y) => x - y);
+                        const sb = lb.slice().sort((x, y) => x - y);
+                        if (sa.every((v, i) => Math.abs(v - sb[i]) < 1e-9)) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // --- PAPER TYPOGRAPHY: question text in Times New Roman, unknowns italic ---
+        const MATHVAR_SET = new Set('xyk'.split(''));
+        function styleVars(html) {
+            return html.split(/(<[^>]+>|\$[^$]*\$)/).map(seg => {
+                if (seg.charAt(0) === '<' || seg.charAt(0) === '$') return seg;
+                return seg.replace(/(^|[^A-Za-zℓ])([A-Za-zℓ])(?=[^A-Za-zℓ]|$)/g,
+                    (m, pre, ch) => pre + (MATHVAR_SET.has(ch) ? '<i class="mathvar">' + ch + '</i>' : ch));
+            }).join('');
+        }
+
+        // --- COLORFUL ANSWER ANIMATIONS (confetti / flash / bounce) ---
+        function celebrate(big) {
+            if (typeof confetti === 'undefined') return;
+            confetti({
+                particleCount: big ? 170 : 70,
+                spread: big ? 100 : 60,
+                startVelocity: big ? 40 : 25,
+                origin: { y: 0.6 },
+                colors: ['#fbbf24', '#f472b6', '#818cf8', '#34d399', '#22d3ee', '#f87171']
+            });
+        }
+        function animateCorrect() {
+            celebrate(false);
+            const area = document.getElementById('main-game-area');
+            if (area) {
+                area.classList.remove('correct-flash', 'wrong-flash');
+                void area.offsetWidth;
+                area.classList.add('correct-flash');
+            }
+            const sc = document.getElementById('live-score');
+            if (sc) {
+                sc.classList.remove('score-bounce');
+                void sc.offsetWidth;
+                sc.classList.add('score-bounce');
+            }
+        }
+        function animateWrong() {
+            const area = document.getElementById('main-game-area');
+            if (area) {
+                area.classList.remove('correct-flash', 'wrong-flash');
+                void area.offsetWidth;
+                area.classList.add('wrong-flash');
+            }
+        }
+        function heartBreak() {
+            const c = document.getElementById('lives-container');
+            if (!c) return;
+            const spans = c.querySelectorAll('span');
+            const dead = spans[lives];
+            if (dead) {
+                dead.textContent = '💔';
+                dead.classList.remove('opacity-30', 'grayscale');
+                dead.classList.add('heart-broken');
+            }
+        }
+        function celebrateBig() {
+            celebrate(true);
+            const badge = document.getElementById('badge-card-' + currentLevel);
+            if (badge) {
+                badge.classList.remove('badge-bounce');
+                void badge.offsetWidth;
+                badge.classList.add('badge-bounce');
+            }
+        }
+
+        // --- CORE GAME LOGIC ---
+
+        function login() {
+            const sClass = document.getElementById('student-class').value.trim().toUpperCase();
+            const sNo = document.getElementById('student-no').value.trim();
+            const sName = document.getElementById('student-name').value.trim();
+
+            if (!sClass || !sNo || !sName) {
+                showToast("Please fill in all details to start.", "error");
+                return;
+            }
+
+            studentProfile = { class: sClass, no: sNo, name: sName };
+            document.getElementById('display-name').textContent = `Welcome, ${sName}`;
+            document.getElementById('display-class').textContent = sClass;
+            document.getElementById('display-no').textContent = sNo;
+
+            loadScores();
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+
+            updatePassportUI();
+            showToast(`Welcome aboard, ${sName}!`, "success");
+        }
+
+        function logout() {
+            studentProfile = null;
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('student-class').value = '';
+            document.getElementById('student-no').value = '';
+            document.getElementById('student-name').value = '';
+        }
+
+        function updatePassportUI() {
+            for (let i = 1; i <= 3; i++) {
+                const statusEl = document.getElementById(`badge-status-${i}`);
+                const iconEl = document.getElementById(`badge-icon-${i}`);
+                const cardEl = document.getElementById(`badge-card-${i}`);
+
+                if (badgeRecords[`level${i}`]) {
+                    statusEl.textContent = "Completed ✅";
+                    statusEl.className = "text-sm font-semibold text-green-400";
+                    iconEl.textContent = "🏆";
+                    cardEl.classList.add('border-amber-500');
+                } else {
+                    statusEl.textContent = "Not Attempted";
+                    statusEl.className = "text-sm font-semibold text-slate-500";
+                    iconEl.textContent = "🔒";
+                    cardEl.classList.remove('border-amber-500');
+                }
+            }
+            updateScoreboardUI();
+        }
+
+        // --- SCORE BOARD LOGIC ---
+        function getScoreStorageKey() {
+            if (!studentProfile) return null;
+            return `hkdse_ineq_score_${studentProfile.class}_${studentProfile.no}_${studentProfile.name}`;
+        }
+
+        function loadScores() {
+            const key = getScoreStorageKey();
+            scoreTotals = { level1: 0, level2: 0, level3: 0 };
+            if (!key) return;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    const saved = JSON.parse(raw);
+                    if (saved && typeof saved.level1 === 'number') scoreTotals = saved;
+                }
+            } catch (e) { console.log('loadScores error', e); }
+        }
+
+        function saveScores() {
+            const key = getScoreStorageKey();
+            if (!key) return;
+            try {
+                localStorage.setItem(key, JSON.stringify(scoreTotals));
+            } catch (e) { console.log('saveScores error', e); }
+        }
+
+        function updateScoreboardUI() {
+            document.getElementById('score-1').textContent = scoreTotals.level1;
+            document.getElementById('score-2').textContent = scoreTotals.level2;
+            document.getElementById('score-3').textContent = scoreTotals.level3;
+            document.getElementById('total-marks').textContent = scoreTotals.level1 + scoreTotals.level2 + scoreTotals.level3;
+        }
+
+        function currentAttemptMarks() {
+            const cfg = MARKS[currentLevel];
+            if (!cfg) return 0;
+            const heartsLost = Math.max(0, LEVEL_LIVES[currentLevel] - lives);
+            return Math.max(0, cfg.full - heartsLost * cfg.perHeart);
+        }
+
+        function updateLiveScore() {
+            const el = document.getElementById('live-score');
+            if (el) el.textContent = currentAttemptMarks();
+        }
+
+        function resetBadges() {
+            if (confirm("Are you sure you want to reset your progress and marks?")) {
+                badgeRecords = { level1: false, level2: false, level3: false };
+                levelStats = { level1: { correct: 0, total: 0 }, level2: { correct: 0, total: 0 }, level3: { correct: 0, total: 0 } };
+                scoreTotals = { level1: 0, level2: 0, level3: 0 };
+                saveScores();
+                updatePassportUI();
+                showToast("Progress and marks reset.", "info");
+            }
+        }
+
+        function startGame(level) {
+            currentLevel = level;
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            const levelColors = ['text-green-400', 'text-amber-400', 'text-red-400'];
+            document.getElementById('level-indicator').className = `font-bold ${levelColors[level - 1]}`;
+            document.getElementById('level-indicator').textContent = `Level ${level}`;
+
+            lives = LEVEL_LIVES[level];
+            currentQuestionIndex = 0;
+            currentQuestions = [];
+            currentSets = [];
+            currentSetIndex = 0;
+            activePart = null;
+            updateLiveScore();
+
+            if (LEVEL_FLOW[level] === 'set') {
+                // Level 1 (3-part) & Level 3 (2-part) multi-part question sets on one page
+                const gen = (level === 1) ? 'generateL1Set' : 'generateL3Set';
+                const usedTexts = new Set();
+                const usedOpts = new Set();
+                const usedAns = new Set();
+                for (let i = 0; i < NUM_QUESTIONS; i++) {
+                    let parts = null, tKey = null, oKey = null, aKey = null, tries = 0;
+                    do {
+                        parts = MathGen[gen]();
+                        tKey = parts.map(p => p.qHtml).join('|');
+                        oKey = parts.map(p => [...p.options].sort().join('~')).join('|');
+                        aKey = parts.map(p => p.answerStr).join('|');
+                        tries++;
+                    } while ((usedTexts.has(tKey) || usedOpts.has(oKey) || usedAns.has(aKey)) && tries < 100);
+                    usedTexts.add(tKey);
+                    usedOpts.add(oKey);
+                    usedAns.add(aKey);
+                    parts.forEach((part, pi) => {
+                        part.setNo = i + 1;
+                        part.partIdx = pi;
+                        part.partLabel = ['(a)', '(b)', '(c)'][pi];
+                        part.paper = part.paper || 'Paper 1';
+                        part.done = false;
+                        part.mode = part.mode || 'fill';
+                    });
+                    currentSets.push(parts);
+                }
+                updateLivesUI();
+                renderSet();
+                return;
+            }
+
+            // Level 2: 5 single MC questions (Paper 2)
+            const typeOrder = MathGen.shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]).slice(0, NUM_QUESTIONS);
+            const usedTexts = new Set();
+            const usedOpts = new Set();
+            const usedAns = new Set();
+            for (let i = 0; i < NUM_QUESTIONS; i++) {
+                let q = null, tKey = null, oKey = null, aKey = null, tries = 0;
+                do {
+                    q = MathGen.generateL2(typeOrder[i]);
+                    tKey = q.text;
+                    oKey = [...q.options].sort().join('~');
+                    aKey = q.answerStr;
+                    tries++;
+                } while ((usedTexts.has(tKey) || usedOpts.has(oKey) || usedAns.has(aKey)) && tries < 300);
+                usedTexts.add(tKey);
+                usedOpts.add(oKey);
+                usedAns.add(aKey);
+                currentQuestions.push(q);
+            }
+
+            updateLivesUI();
+            renderQuestion();
+        }
+
+        function updateLivesUI() {
+            const container = document.getElementById('lives-container');
+            const maxLives = LEVEL_LIVES[currentLevel];
+            container.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                container.innerHTML += '<span class="heart-bounce">❤️</span>';
+            }
+            for (let i = lives; i < maxLives; i++) {
+                container.innerHTML += '<span class="opacity-30 grayscale">❤️</span>';
+            }
+        }
+
+        function renderQuestion() {
+            document.getElementById('q-counter').textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            const q = currentQuestions[currentQuestionIndex];
+
+            document.getElementById('l3-area').classList.add('hidden');
+            document.getElementById('question-display').classList.remove('hidden');
+
+            const displayEl = document.getElementById('question-display');
+            displayEl.innerHTML = styleVars(q.text);
+
+            document.getElementById('question-instruction').textContent = q.instruction;
+            document.getElementById('paper-hint').textContent =
+                (q.paper === 'Paper 1') ? 'DSE Paper 1 · ' + q.src :
+                'DSE Paper 2 · ' + q.src;
+
+            const partLabelEl = document.getElementById('part-label');
+            partLabelEl.textContent = '';
+            partLabelEl.classList.add('hidden');
+
+            // Question format fixed by its source paper (Paper 2 → MC only)
+            currentQuestionMode = (q.paper === 'Paper 2') ? 'mc' : 'fill';
+
+            const mcArea = document.getElementById('mc-options');
+            const fillArea = document.getElementById('conventional-area');
+            const hint = document.getElementById('format-hint');
+
+            if (currentQuestionMode === 'mc') {
+                mcArea.classList.remove('hidden');
+                fillArea.classList.add('hidden');
+                hint.textContent = "Multiple Choice Mode";
+
+                const btns = mcArea.querySelectorAll('button');
+                btns.forEach((btn, idx) => {
+                    btn.innerHTML = q.options[idx];
+                });
+            } else {
+                mcArea.classList.add('hidden');
+                fillArea.classList.remove('hidden');
+                hint.textContent = "Fill-in Mode";
+
+                document.getElementById('conventional-input').value = '';
+                document.getElementById('math-preview').textContent = 'Empty';
+
+                const helperBox = document.getElementById('helper-buttons');
+                helperBox.innerHTML = '';
+                ['<', '>', '≤', '≥', '≠', '−', '/'].forEach(ch => {
+                    helperBox.innerHTML += `<button onclick="insertAtCursor('${ch}')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-white font-mono text-sm transition">${ch}</button>`;
+                });
+            }
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // --- Level 1 & 3: render the whole question set as (a)(b)(c) blocks on one page ---
+        function renderSet() {
+            const set = currentSets[currentSetIndex];
+            document.getElementById('q-counter').textContent = set.length > 1
+                ? `Set ${currentSetIndex + 1}/${currentSets.length}`
+                : `Q: ${currentSetIndex + 1}/${currentSets.length}`;
+            document.getElementById('question-instruction').textContent = set.length > 1
+                ? "Answer all parts of the question:"
+                : (set[0].mode === 'mc' ? "Choose the correct answer:" : "Answer the question:");
+            const paperTag = set[0].paper === 'TSA' ? 'TSA 3A03' : 'DSE Paper 1';
+            document.getElementById('paper-hint').textContent = paperTag + ' · ' + set[0].src + (set.length > 1 ? ' · Multi-part' : '');
+            document.getElementById('format-hint').textContent = set[0].mode === 'mc' ? 'Multiple Choice Mode' : 'Fill-in Mode';
+
+            const partLabelEl = document.getElementById('part-label');
+            partLabelEl.textContent = '';
+            partLabelEl.classList.add('hidden');
+
+            document.getElementById('question-display').classList.add('hidden');
+            document.getElementById('mc-options').classList.add('hidden');
+            document.getElementById('conventional-area').classList.add('hidden');
+            const l3Area = document.getElementById('l3-area');
+            l3Area.classList.remove('hidden');
+
+            const blocksEl = document.getElementById('l3-blocks');
+            blocksEl.innerHTML = '';
+
+            set.forEach((part, pi) => {
+                const block = document.createElement('div');
+                block.id = `l3-block-${pi}`;
+                block.className = `bg-slate-800/60 border ${part.done ? 'border-green-500/70' : 'border-slate-700'} rounded-2xl p-4 transition-all duration-300`;
+                blocksEl.appendChild(block);
+                rebuildL3Block(pi);
+            });
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function insertL3Char(pi, ch) {
+            const f = document.getElementById(`l3-input-${pi}`);
+            const start = f.selectionStart ?? f.value.length;
+            const end = f.selectionEnd ?? f.value.length;
+            f.value = f.value.substring(0, start) + ch + f.value.substring(end, f.value.length);
+            const pos = start + ch.length;
+            f.setSelectionRange(pos, pos);
+            f.focus();
+            updateL3Preview(pi);
+        }
+
+        function updateL3Preview(pi) {
+            const input = document.getElementById(`l3-input-${pi}`).value;
+            const previewBox = document.getElementById(`l3-preview-${pi}`);
+            if (!previewBox) return;
+            previewBox.textContent = input.trim() ? input : 'Empty';
+        }
+
+        function submitSetPartMC(pi, btnIdx) {
+            const set = currentSets[currentSetIndex];
+            const part = set[pi];
+            if (part.done) return;
+            activePart = part;
+            const isCorrect = (part.options[btnIdx] === `$ ${part.mcAnswerStr} $`);
+            processSetAnswer(pi, isCorrect);
+        }
+
+        function submitSetPartFill(pi) {
+            const set = currentSets[currentSetIndex];
+            const part = set[pi];
+            if (part.done) return;
+            activePart = part;
+
+            const rawInput = document.getElementById(`l3-input-${pi}`).value;
+            if (!rawInput.trim()) {
+                showToast("Please enter an answer.", "info");
+                return;
+            }
+            const cleanInput = rawInput.toLowerCase().replace(/\*/g, '');
+            const isCorrect = checkFillAnswer(cleanInput, part);
+            processSetAnswer(pi, isCorrect);
+        }
+
+        function rebuildL3Block(pi) {
+            const part = currentSets[currentSetIndex][pi];
+            const block = document.getElementById(`l3-block-${pi}`);
+            if (!block) return;
+            const marksLabel = `Part ${part.partLabel} · ${part.marks} mark${part.marks > 1 ? 's' : ''}`;
+            let inner = '';
+            inner += `<div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-bold text-emerald-400">${marksLabel}</span>
+                <span id="l3-status-${pi}" class="${part.done ? 'text-green-400' : 'text-slate-400'} text-sm font-semibold">${part.done ? '✓ Correct' : ''}</span>
+            </div>`;
+            inner += `<div id="l3-q-${pi}" class="qtext text-xl sm:text-2xl text-white mb-3 text-center overflow-x-auto min-h-[40px] leading-relaxed">${styleVars(part.qHtml)}</div>`;
+            if (part.done) {
+                inner += `<div class="text-center text-green-400 text-sm py-2 font-semibold">Answer: $ ${part.mcAnswerStr} $</div>`;
+            } else if (part.mode === 'mc') {
+                inner += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+                part.options.forEach((o, bi) => {
+                    inner += `<button onclick="submitSetPartMC(${pi}, ${bi})" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-3 text-lg transition-all shadow-md active:scale-95 min-h-[56px] flex items-center justify-center">${o}</button>`;
+                });
+                inner += `</div>`;
+            } else {
+                inner += `
+                <div class="flex gap-2 w-full">
+                    <input type="text" id="l3-input-${pi}" placeholder="e.g. x > -9/2" oninput="updateL3Preview(${pi})" onkeypress="if(event.key==='Enter')submitSetPartFill(${pi})" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-lg font-mono text-white outline-none focus:border-amber-500 transition shadow-inner">
+                    <button onclick="submitSetPartFill(${pi})" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 rounded-lg text-base transition shadow-md active:scale-95">Submit</button>
+                </div>
+                <div id="l3-helpers-${pi}" class="flex flex-wrap gap-2 justify-center w-full mt-2">`;
+                ['<', '>', '≤', '≥', '≠', '−', '/'].forEach(op => {
+                    inner += `<button onclick="insertL3Char(${pi},'${op}')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-white font-mono text-sm transition">${op}</button>`;
+                });
+                inner += `</div>
+                <div class="w-full p-3 bg-slate-900/60 border border-slate-700 rounded-lg text-center mt-2">
+                    <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1 block">Live Answer Preview</span>
+                    <div id="l3-preview-${pi}" class="text-lg text-slate-300 min-h-[28px] flex items-center justify-center">Empty</div>
+                </div>`;
+            }
+            block.innerHTML = inner;
+            block.classList.remove('border-slate-700');
+            block.classList.add(part.done ? 'border-green-500/70' : 'border-slate-700');
+        }
+
+        function processSetAnswer(pi, isCorrect) {
+            levelStats[`level${currentLevel}`].total++;
+
+            if (isCorrect) {
+                levelStats[`level${currentLevel}`].correct++;
+                showToast(`Part ${currentSets[currentSetIndex][pi].partLabel} correct! Awesome job.`, "success");
+
+                const set = currentSets[currentSetIndex];
+                                animateCorrect();
+                                set[pi].done = true;
+                rebuildL3Block(pi);
+
+                if (set.every(p => p.done)) {
+                    setTimeout(() => {
+                        currentSetIndex++;
+                        if (currentSetIndex >= currentSets.length) {
+                            winGame();
+                        } else {
+                            renderSet();
+                        }
+                    }, 700);
+                }
+            } else {
+                                animateWrong();
+                                showWrongReflectionModal();
+            }
+        }
+
+        function insertAtCursor(myValue) {
+            const myField = document.getElementById('conventional-input');
+            if (document.selection) {
+                myField.focus();
+                const sel = document.selection.createRange();
+                sel.text = myValue;
+            } else if (myField.selectionStart || myField.selectionStart == '0') {
+                const startPos = myField.selectionStart;
+                const endPos = myField.selectionEnd;
+                myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos, myField.value.length);
+                myField.selectionStart = startPos + myValue.length;
+                myField.selectionEnd = startPos + myValue.length;
+            } else {
+                myField.value += myValue;
+            }
+            myField.focus();
+            updateLivePreview();
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') submitFillAnswer();
+        }
+
+        function submitMCAnswer(btnIndex) {
+            const q = currentQuestions[currentQuestionIndex];
+            const selectedText = q.options[btnIndex];
+            const isCorrect = (selectedText === `$ ${q.mcAnswerStr} $`);
+            processAnswer(isCorrect);
+        }
+
+        function submitFillAnswer() {
+            const q = currentQuestions[currentQuestionIndex];
+            const rawInput = document.getElementById('conventional-input').value;
+
+            if (!rawInput.trim()) {
+                showToast("Please enter an answer.", "info");
+                return;
+            }
+
+            const cleanInput = rawInput.toLowerCase().replace(/\*/g, '');
+            const isCorrect = checkFillAnswer(cleanInput, q);
+            processAnswer(isCorrect);
+        }
+
+        function processAnswer(isCorrect) {
+            levelStats[`level${currentLevel}`].total++;
+
+            if (isCorrect) {
+                levelStats[`level${currentLevel}`].correct++;
+                                animateCorrect();
+                                showToast("Correct! Awesome job.", "success");
+                currentQuestionIndex++;
+
+                if (currentQuestionIndex >= currentQuestions.length) {
+                    winGame();
+                } else {
+                    renderQuestion();
+                }
+            } else {
+                                animateWrong();
+                                showWrongReflectionModal();
+            }
+        }
+
+        function showWrongReflectionModal() {
+            const modal = document.getElementById('wrong-reflection-modal');
+            modal.classList.remove('hidden');
+            if (window.MathJax) MathJax.typesetPromise([modal]);
+        }
+
+        function submitWrongReflection(selectedLaw) {
+            const q = (currentLevel === 1 || currentLevel === 3) ? activePart : currentQuestions[currentQuestionIndex];
+            const actualLaw = q.firstStepLaw;
+
+            const isLawCorrect = (selectedLaw === actualLaw);
+
+            document.getElementById('wrong-reflection-modal').classList.add('hidden');
+
+            if (isLawCorrect) {
+                showToast("Good reflection! You identified the correct technique to start with.", "success");
+            } else {
+                showToast("Not quite! Remember to check the Formulas sheet or ask AI Tutor.", "error");
+            }
+
+            lives--;
+            updateLivesUI();
+            heartBreak();
+            updateLiveScore();
+            showWrongFeedback();
+
+            const gameArea = document.getElementById('main-game-area');
+            gameArea.classList.add('shake');
+            setTimeout(() => gameArea.classList.remove('shake'), 400);
+
+            if (lives <= 0) {
+                setTimeout(() => {
+                    showToast("Mission Failed. Out of lives!", "error");
+                    quitGame();
+                }, 500);
+            }
+        }
+
+        function winGame() {
+                        badgeRecords[`level${currentLevel}`] = true;
+            celebrateBig();
+            const earned = currentAttemptMarks();
+            scoreTotals[`level${currentLevel}`] += earned;
+            saveScores();
+            showToast(`Level ${currentLevel} Complete! +${earned} marks earned! 🏆`, "success");
+            quitGame();
+        }
+
+        function quitGame() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            updatePassportUI();
+        }
+
+        function updateLivePreview() {
+            const input = document.getElementById('conventional-input').value;
+            const previewBox = document.getElementById('math-preview');
+            if (!previewBox) return;
+            previewBox.textContent = input.trim() ? input : 'Empty';
+        }
+
+        // --- HELPER UI FUNCTIONS ---
+
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        function showWrongFeedback() {
+            const el = document.getElementById('feedback-toast');
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 3000);
+        }
+
+        function toggleCheatSheet() {
+            const modal = document.getElementById('cheat-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function closeAITutor() {
+            document.getElementById('ai-tutor-modal').classList.add('hidden');
+        }
+
+        function askAITutor() {
+            let q;
+            if (currentLevel === 1 || currentLevel === 3) {
+                q = activePart;
+                if (!q) {
+                    q = currentSets[currentSetIndex].find(p => !p.done) || currentSets[currentSetIndex][0];
+                }
+            } else {
+                q = currentQuestions[currentQuestionIndex];
+            }
+            let hint = "";
+            switch (q.firstStepLaw) {
+                case 'isolate_x':
+                    hint = "Move all the $x$-terms to one side and the constants to the other (like solving an equation). Keep the inequality sign the same — unless you multiply or divide by a negative.";
+                    break;
+                case 'flip_sign':
+                    hint = "When you multiply or divide both sides by a negative number, you must REVERSE the inequality sign (e.g. $-x > a$ becomes $x < -a$).";
+                    break;
+                case 'clear_fraction':
+                    hint = "Multiply both sides by the LCM of the denominators to clear the fraction first. Then isolate $x$ as usual, remembering to flip the sign if you divide by a negative.";
+                    break;
+                case 'intersect':
+                    hint = "For an \"and\" compound inequality, solve each inequality separately, then take the OVERLAP (intersection) of the two solutions. Draw both on a number line to find the common region.";
+                    break;
+                case 'union':
+                    hint = "For an \"or\" compound inequality, solve each inequality separately, then take the UNION (combine) of the two solutions. If one interval is inside the other, the union is just the larger interval.";
+                    break;
+                case 'chained_split':
+                    hint = "Split the chained inequality $a < b < c$ into two inequalities ($a < b$ and $b < c$), solve each, then take the overlap.";
+                    break;
+                case 'discriminant':
+                    hint = "A quadratic $ax^2+bx+c$ is $\\ge 0$ (or $>0$) for ALL real $x$ when it opens upwards ($a>0$) and has at most one real root, i.e. the discriminant $\\Delta = b^2-4ac \\le 0$.";
+                    break;
+                case 'count_integers':
+                    hint = "List the integers that fall inside the range from part (a) — remember whether the endpoints are strict ($<$/$>$) or inclusive ($\\le$/$\\ge$) — then count them or pick the least/greatest one as asked.";
+                    break;
+                case 'compare':
+                    hint = "Compare the two numbers on the same form (both decimals, or a common denominator). A larger positive denominator makes a positive fraction smaller. For $x \\ge a$, any number smaller than $a$ cannot be a value of $x$.";
+                    break;
+                default:
+                    hint = "Solve each linear inequality by isolating $x$ (flip the sign when dividing by a negative), then combine with \"and\" (overlap) or \"or\" (union).";
+            }
+
+            document.getElementById('ai-content-area').innerHTML = `
+                <div class="bg-slate-800/80 p-5 rounded-lg border border-purple-500/30 mb-4 shadow-inner">
+                    <p class="text-purple-300 font-semibold mb-2 text-lg">🤖 AI Hint specifically for this question:</p>
+                    <p class="text-white text-base">${hint}</p>
+                </div>
+                <div class="bg-slate-800/80 p-5 rounded-lg border border-slate-600 shadow-inner">
+                    <p class="text-amber-400 font-semibold mb-2 text-lg">💡 General Checklist:</p>
+                    <ul class="list-disc list-inside space-y-2 text-slate-300">
+                        <li>Multiplying or dividing both sides by a negative reverses the inequality sign.</li>
+                        <li>"and" means the overlap (intersection) of the two solutions.</li>
+                        <li>"or" means the union of the two solutions.</li>
+                        <li>For integer counts, check whether the endpoints are strict (&lt; / &gt;) or inclusive (≤ / ≥).</li>
+                    </ul>
+                </div>
+            `;
+            document.getElementById('ai-tutor-modal').classList.remove('hidden');
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        // --- REFLECTION & SUBMISSION LOGIC ---
+
+        function submitToTeacher() {
+            if (!studentProfile) return;
+
+            const btn = document.getElementById('btn-submit-teacher');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Sending... ⏳';
+            btn.disabled = true;
+
+            const getPercent = (lvl) => {
+                const s = levelStats[lvl];
+                return s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "N/A";
+            };
+
+            const payload = {
+                timestamp: new Date().toISOString(),
+                topic: 'Inequalities',
+                class: studentProfile.class,
+                no: studentProfile.no,
+                name: studentProfile.name,
+                level1: badgeRecords.level1,
+                level1Percent: getPercent('level1'),
+                level1Marks: scoreTotals.level1,
+                level2: badgeRecords.level2,
+                level2Percent: getPercent('level2'),
+                level2Marks: scoreTotals.level2,
+                level3: badgeRecords.level3,
+                level3Percent: getPercent('level3'),
+                level3Marks: scoreTotals.level3,
+                totalMarks: scoreTotals.level1 + scoreTotals.level2 + scoreTotals.level3
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'text/plain;charset=UTF-8',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data && data.status === 'success') {
+                    showToast("Data submitted to teacher successfully!", "success");
+                } else {
+                    showToast("Server replied but data not saved: " + (data && data.message ? data.message : 'unknown error'), "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast("Submission failed. Check your internet / Apps Script deployment.", "error");
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
