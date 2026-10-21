@@ -270,12 +270,15 @@
             </div>
             <div class="flex items-center gap-2">
                 <div class="text-slate-300 font-mono bg-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
-                    Q: <span id="q-counter">1/5</span>
+                    <span id="q-counter">Q: 1/5</span>
                 </div>
                 <div class="text-amber-300 font-mono bg-slate-900 border border-amber-500/30 px-3 py-1 rounded-full text-sm font-semibold">
                     ⭐ <span id="live-score">0</span>
                 </div>
             </div>
+            <button onclick="skipQuestion()" class="text-slate-500 hover:text-amber-400 transition text-xs font-bold uppercase tracking-wider mr-3">
+                Skip
+            </button>
             <button onclick="quitGame()" class="text-slate-500 hover:text-red-400 transition text-xs font-bold uppercase tracking-wider">
                 Abort
             </button>
@@ -285,7 +288,7 @@
 
             <div class="w-full flex justify-between items-center mb-2 border-b border-slate-700/50 pb-3">
                 <div class="flex flex-col text-left">
-                    <h3 class="text-slate-300 text-sm font-semibold" id="question-instruction">Solve the percentage problem:</h3>
+                    <h3 class="text-slate-300 text-sm font-semibold" id="question-instruction">Solve the inequality:</h3>
                     <div class="flex gap-3 flex-wrap">
                         <span class="text-xs text-amber-400 font-semibold" id="format-hint"></span>
                         <span class="text-xs text-sky-400 font-semibold" id="paper-hint"></span>
@@ -445,7 +448,7 @@
         const GOOGLE_SCRIPT_URL =
             'https://script.google.com/macros/s/AKfycbxMdA74aQ16yAZwpxdN0wk-SH_7MuMWUCRBGUqSD94XI-2TivivjU5FNjuUpPS1ShUyUA/exec';
 
-        const APP_VERSION = '1';
+        const APP_VERSION = '2';
         (function watchAppVersion() {
             const file = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
             const check = () => {
@@ -1321,6 +1324,51 @@
             }).join('');
         }
 
+        // Safe MathJax typeset: window.MathJax is only the config object until the
+        // CDN script finishes loading, so wait for the startup promise when needed.
+        function mjTypeset(elements) {
+            if (!window.MathJax) return;
+            const go = () => {
+                try {
+                    const p = elements ? MathJax.typesetPromise(elements) : MathJax.typesetPromise();
+                    if (p && p.catch) p.catch(() => {});
+                } catch (e) { /* ignore */ }
+            };
+            if (typeof MathJax.typesetPromise === 'function') { go(); return; }
+            if (MathJax.startup && MathJax.startup.promise && typeof MathJax.startup.promise.then === 'function') {
+                MathJax.startup.promise.then(go).catch(() => {});
+            }
+        }
+
+        // Live Answer Preview: render the typed answer as proper math.
+        // Only whitelisted characters reach MathJax; anything else falls back to plain text.
+        function previewTex(raw) {
+            const s = String(raw).trim();
+            if (!s) return null;
+            if (!/^[0-9A-Za-z\s+\-*/().,<>=≤≥≠^−]+$/.test(s)) return null;
+            let tex = s
+                .replace(/−/g, '-')
+                .replace(/\*/g, '')
+                .replace(/>=/g, '\\ge ')
+                .replace(/<=/g, '\\le ')
+                .replace(/!=/g, '\\ne ')
+                .replace(/<>/g, '\\ne ');
+            tex = tex.replace(/(\([^()]*\)|[0-9]+(?:\.[0-9]+)?)\s*\/\s*(\([^()]*\)|[0-9]+(?:\.[0-9]+)?)/g, '\\frac{$1}{$2}');
+            tex = tex.replace(/\b(and|or)\b/gi, m => '\\text{ ' + m.toLowerCase() + ' }');
+            return tex;
+        }
+        function updatePreviewBox(box, raw) {
+            if (!box) return;
+            const tex = previewTex(raw);
+            if (tex === null) {
+                box.textContent = String(raw).trim() ? String(raw) : 'Empty';
+                return;
+            }
+            const esc = tex.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            box.innerHTML = '$ ' + esc + ' $';
+            mjTypeset([box]);
+        }
+
         // --- COLORFUL ANSWER ANIMATIONS (confetti / flash / bounce) ---
         function celebrate(big) {
             if (typeof confetti === 'undefined') return;
@@ -1576,7 +1624,7 @@
         }
 
         function renderQuestion() {
-            document.getElementById('q-counter').textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('q-counter').textContent = `Q: ${currentQuestionIndex + 1}/${currentQuestions.length}`;
             const q = currentQuestions[currentQuestionIndex];
 
             document.getElementById('l3-area').classList.add('hidden');
@@ -1625,9 +1673,7 @@
                 });
             }
 
-            if (window.MathJax) {
-                MathJax.typesetPromise();
-            }
+            mjTypeset();
         }
 
         // --- Level 1 & 3: render the whole question set as (a)(b)(c) blocks on one page ---
@@ -1664,7 +1710,7 @@
                 rebuildL3Block(pi);
             });
 
-            if (window.MathJax) MathJax.typesetPromise();
+            mjTypeset();
         }
 
         function insertL3Char(pi, ch) {
@@ -1682,7 +1728,7 @@
             const input = document.getElementById(`l3-input-${pi}`).value;
             const previewBox = document.getElementById(`l3-preview-${pi}`);
             if (!previewBox) return;
-            previewBox.textContent = input.trim() ? input : 'Empty';
+            updatePreviewBox(previewBox, input);
         }
 
         function submitSetPartMC(pi, btnIdx) {
@@ -1742,12 +1788,13 @@
                 inner += `</div>
                 <div class="w-full p-3 bg-slate-900/60 border border-slate-700 rounded-lg text-center mt-2">
                     <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1 block">Live Answer Preview</span>
-                    <div id="l3-preview-${pi}" class="text-lg text-slate-300 min-h-[28px] flex items-center justify-center">Empty</div>
+                    <div id="l3-preview-${pi}" class="text-xl text-slate-300 min-h-[44px] flex items-center justify-center">Empty</div>
                 </div>`;
             }
             block.innerHTML = inner;
             block.classList.remove('border-slate-700');
             block.classList.add(part.done ? 'border-green-500/70' : 'border-slate-700');
+            mjTypeset([block]);
         }
 
         function processSetAnswer(pi, isCorrect) {
@@ -1845,7 +1892,7 @@
         function showWrongReflectionModal() {
             const modal = document.getElementById('wrong-reflection-modal');
             modal.classList.remove('hidden');
-            if (window.MathJax) MathJax.typesetPromise([modal]);
+            mjTypeset([modal]);
         }
 
         function submitWrongReflection(selectedLaw) {
@@ -1896,11 +1943,69 @@
             updatePassportUI();
         }
 
+        // Skip the current question/set without scoring (no mark, no life loss).
+        // A fresh unused question/set of the same level replaces the current one —
+        // the progress counter never advances, so a level can only be completed
+        // by answering the required number correctly.
+        function skipQuestion() {
+            if (LEVEL_FLOW[currentLevel] === 'set') {
+                const usedTexts = new Set();
+                const usedOpts = new Set();
+                const usedAns = new Set();
+                currentSets.forEach((s, i) => {
+                    if (i === currentSetIndex) return;
+                    usedTexts.add(s.map(p => p.qHtml).join('|'));
+                    usedOpts.add(s.map(p => [...p.options].sort().join('~')).join('|'));
+                    usedAns.add(s.map(p => p.answerStr).join('|'));
+                });
+                const gen = (currentLevel === 1) ? 'generateL1Set' : 'generateL3Set';
+                let parts = null, tKey = null, oKey = null, aKey = null, tries = 0;
+                do {
+                    parts = MathGen[gen]();
+                    tKey = parts.map(p => p.qHtml).join('|');
+                    oKey = parts.map(p => [...p.options].sort().join('~')).join('|');
+                    aKey = parts.map(p => p.answerStr).join('|');
+                    tries++;
+                } while ((usedTexts.has(tKey) || usedOpts.has(oKey) || usedAns.has(aKey)) && tries < 100);
+                parts.forEach((part, pi) => {
+                    part.setNo = currentSetIndex + 1;
+                    part.partIdx = pi;
+                    part.partLabel = ['(a)', '(b)', '(c)'][pi];
+                    part.paper = part.paper || 'Paper 1';
+                    part.done = false;
+                    part.mode = part.mode || 'fill';
+                });
+                currentSets[currentSetIndex] = parts;
+                activePart = null;
+                renderSet();
+            } else {
+                const usedTexts = new Set();
+                const usedOpts = new Set();
+                const usedAns = new Set();
+                currentQuestions.forEach((q, i) => {
+                    if (i === currentQuestionIndex) return;
+                    usedTexts.add(q.text);
+                    usedOpts.add([...q.options].sort().join('~'));
+                    usedAns.add(q.answerStr);
+                });
+                let q = null, tKey = null, oKey = null, aKey = null, tries = 0;
+                do {
+                    q = MathGen.generateL2(MathGen.rand(0, 13));
+                    tKey = q.text;
+                    oKey = [...q.options].sort().join('~');
+                    aKey = q.answerStr;
+                    tries++;
+                } while ((usedTexts.has(tKey) || usedOpts.has(oKey) || usedAns.has(aKey)) && tries < 300);
+                currentQuestions[currentQuestionIndex] = q;
+                renderQuestion();
+            }
+        }
+
         function updateLivePreview() {
             const input = document.getElementById('conventional-input').value;
             const previewBox = document.getElementById('math-preview');
             if (!previewBox) return;
-            previewBox.textContent = input.trim() ? input : 'Empty';
+            updatePreviewBox(previewBox, input);
         }
 
         // --- HELPER UI FUNCTIONS ---
@@ -1995,7 +2100,7 @@
                 </div>
             `;
             document.getElementById('ai-tutor-modal').classList.remove('hidden');
-            if (window.MathJax) MathJax.typesetPromise();
+            mjTypeset();
         }
 
         // --- REFLECTION & SUBMISSION LOGIC ---
