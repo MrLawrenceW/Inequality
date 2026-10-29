@@ -143,6 +143,7 @@
             <div class="text-5xl mb-4">🧮</div>
             <h1 class="text-2xl font-bold text-white mb-2">HKDSE Mathematics</h1>
             <h2 class="text-amber-400 font-semibold tracking-wide uppercase text-sm">Ch. 17 Inequalities</h2>
+            <div id="preview-badge"></div>
         </div>
 
         <div class="space-y-4">
@@ -162,6 +163,7 @@
                 Start Mission
             </button>
         </div>
+        <div id="ver-switch" class="mt-6 text-center text-xs"></div>
     </div>
 
     <div id="dashboard-screen" class="hidden w-full max-w-3xl flex flex-col gap-6 transition-all duration-500">
@@ -448,7 +450,9 @@
         const GOOGLE_SCRIPT_URL =
             'https://script.google.com/macros/s/AKfycbxMdA74aQ16yAZwpxdN0wk-SH_7MuMWUCRBGUqSD94XI-2TivivjU5FNjuUpPS1ShUyUA/exec';
 
-        const APP_VERSION = '3';
+        const APP_VERSION = '6';
+        const IS_FEATURE = /\/feature\//.test(location.pathname);
+        const MAIN_SITE_URL = 'https://mrlawrencew.github.io/Inequality/';
         (function watchAppVersion() {
             const file = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
             const check = () => {
@@ -463,6 +467,14 @@
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') check();
             });
+        })();
+
+        (function renderVersionSwitch() {
+            if (!IS_FEATURE) return;
+            const badge = document.getElementById('preview-badge');
+            if (badge) badge.innerHTML = '<span class="inline-block mt-3 px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 text-xs font-bold tracking-widest uppercase border border-amber-500/40">Feature Preview</span>';
+            const slot = document.getElementById('ver-switch');
+            if (slot) slot.innerHTML = '<a href="' + MAIN_SITE_URL + '" class="text-slate-500 hover:text-amber-400 transition">&larr; Back to main version</a>';
         })();
 
         let studentProfile = null;
@@ -1155,9 +1167,79 @@
                 return this.tsaSolve();
             },
 
+            // Two terms with a fraction on one side: ax ± (bx+c)/d  OP  e  (e.g. 2x - (5x+9)/4 > 1)
+            l1FracTerm: function () {
+                const d = [2, 3, 4, 5][this.rand(0, 3)];
+                const a = this.rand(2, 6);
+                const minus = this.rand(0, 1) === 1;
+                let b = this.rand(2, 9);
+                if (minus && b === a * d) b += 1;
+                const op = ['>', '<', '≥', '≤'][this.rand(0, 3)];
+                const e = this.rand(1, 9);
+                const badC = minus ? -d * e : d * e;
+                let c = 0;
+                do { c = this.rand(-9, 9); } while (c === 0 || c === badC);
+                const coef = minus ? a * d - b : a * d + b;
+                const n = minus ? d * e + c : d * e - c;
+                const flipMap = { '>': '<', '<': '>', '≥': '≤', '≤': '≥' };
+                const opF = coef < 0 ? flipMap[op] : op;
+                const sol = 'x ' + opF + ' ' + this.fr(n, coef);
+                const inner = this.lin(b, c);
+                const ineq = minus ? `${a}x - (${inner})/${d} ${op} ${e}` : `${a}x + (${inner})/${d} ${op} ${e}`;
+                const opTex = op === '≥' ? '\\ge' : op === '≤' ? '\\le' : op;
+                const lhsTex = `${a}x ${minus ? '-' : '+'} \\frac{${this.tex(inner)}}{${d}}`;
+                const qHtml = `Solve the inequality&nbsp;$${lhsTex} ${opTex} ${e}$.`;
+                const p = this.part(qHtml, sol, this.tex(sol), this.texOpts(this.tex(sol), []), 'clear_fraction', 1, null, ineq);
+                p.mode = 'fill'; p.paper = 'Paper 1'; p.src = 'L1 frac-term';
+                return [p];
+            },
+
+            // Level 3 compound set whose first inequality is the two-term fraction form
+            fracCompoundSet: function () {
+                const d = [2, 3, 4, 5][this.rand(0, 3)];
+                const a = this.rand(3, 6);
+                const b = this.rand(2, a * d - 1);
+                const e = this.rand(1, 6);
+                const badC = -d * e;
+                let c = 0;
+                do { c = this.rand(-9, 9); } while (c === 0 || c === badC);
+                const coef = a * d - b;
+                const n = d * e + c;
+                const ineq1 = `${a}x - (${this.lin(b, c)})/${d} > ${e}`;
+                const sol1 = 'x > ' + this.fr(n, coef);
+                const k1 = Math.floor(n / coef);
+                const k2 = k1 + this.rand(2, 4);
+                const p = [2, 3, 4][this.rand(0, 2)];
+                const q = [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6][this.rand(0, 11)];
+                const ineq2 = `${this.lin(p, q)} < ${p * k2 + q}`;
+                const sol2 = 'x < ' + k2;
+                const compound = this.fr(n, coef) + ' < x < ' + k2;
+                const kind = ['least', 'greatest', 'count_all'][this.rand(0, 2)];
+                const lo = k1 + 1;
+                let followQ, followAns;
+                if (kind === 'least') {
+                    followQ = 'Write down the least integer which satisfies both inequalities in (a).';
+                    followAns = String(lo);
+                } else if (kind === 'greatest') {
+                    followQ = 'Write down the greatest integer which satisfies both inequalities in (a).';
+                    followAns = String(k2 - 1);
+                } else {
+                    followQ = 'How many integers satisfy both inequalities in (a)?';
+                    followAns = String(k2 - lo);
+                }
+                return {
+                    src: 'L3 frac-term', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ, followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+
             // ════════════ LEVEL 1 — TSA 3A03 + revised Paper 1 (2-part sets) ════════════
             generateL1Set: function () {
-                if (this.rand(0, 4) < 3) return this.generateTSA();
+                const roll = this.rand(0, 9);
+                if (roll < 5) return this.generateTSA();
+                if (roll < 8) return this.l1FracTerm();
                 const idx = this.L1_IDX[this.rand(0, this.L1_IDX.length - 1)];
                 const s = this[this.SRC_FNS[idx]]();
                 const parts = [
@@ -1170,8 +1252,7 @@
 
             // ════════════ LEVEL 3 — original Paper 1 (2-part sets) ════════════
             generateL3Set: function () {
-                const idx = this.rand(0, this.SRC_FNS.length - 1);
-                const s = this[this.SRC_FNS[idx]]();
+                const s = this.rand(0, 4) === 0 ? this.fracCompoundSet() : this[this.SRC_FNS[this.rand(0, this.SRC_FNS.length - 1)]]();
                 const rawC = s.join === 'and' ? `${s.ineq1} and ${s.ineq2}` : `${s.ineq1} or ${s.ineq2}`;
                 const aText = s.join === 'and'
                     ? `Find the range of values of x which satisfy both&nbsp;${this.texCompound(rawC)}.`
@@ -1483,7 +1564,7 @@
         // --- SCORE BOARD LOGIC ---
         function getScoreStorageKey() {
             if (!studentProfile) return null;
-            return `hkdse_ineq_score_${studentProfile.class}_${studentProfile.no}_${studentProfile.name}`;
+            return `${IS_FEATURE ? 'preview_' : ''}hkdse_ineq_score_${studentProfile.class}_${studentProfile.no}_${studentProfile.name}`;
         }
 
         function loadScores() {
@@ -2107,6 +2188,10 @@
 
         function submitToTeacher() {
             if (!studentProfile) return;
+            if (IS_FEATURE) {
+                showToast("Preview version — not submitted to teacher.", "info");
+                return;
+            }
 
             const btn = document.getElementById('btn-submit-teacher');
             const originalText = btn.innerHTML;
