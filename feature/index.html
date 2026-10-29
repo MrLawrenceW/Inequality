@@ -450,7 +450,7 @@
         const GOOGLE_SCRIPT_URL =
             'https://script.google.com/macros/s/AKfycbxMdA74aQ16yAZwpxdN0wk-SH_7MuMWUCRBGUqSD94XI-2TivivjU5FNjuUpPS1ShUyUA/exec';
 
-        const APP_VERSION = '4';
+        const APP_VERSION = '5';
         const IS_FEATURE = /\/feature\//.test(location.pathname);
         const MAIN_SITE_URL = 'https://mrlawrencew.github.io/Inequality/';
         (function watchAppVersion() {
@@ -1194,6 +1194,47 @@
                 return [p];
             },
 
+            // Level 3 compound set whose first inequality is the two-term fraction form
+            fracCompoundSet: function () {
+                const d = [2, 3, 4, 5][this.rand(0, 3)];
+                const a = this.rand(3, 6);
+                const b = this.rand(2, a * d - 1);
+                const e = this.rand(1, 6);
+                const badC = -d * e;
+                let c = 0;
+                do { c = this.rand(-9, 9); } while (c === 0 || c === badC);
+                const coef = a * d - b;
+                const n = d * e + c;
+                const ineq1 = `${a}x - (${this.lin(b, c)})/${d} > ${e}`;
+                const sol1 = 'x > ' + this.fr(n, coef);
+                const k1 = Math.floor(n / coef);
+                const k2 = k1 + this.rand(2, 4);
+                const p = [2, 3, 4][this.rand(0, 2)];
+                const q = [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6][this.rand(0, 11)];
+                const ineq2 = `${this.lin(p, q)} < ${p * k2 + q}`;
+                const sol2 = 'x < ' + k2;
+                const compound = this.fr(n, coef) + ' < x < ' + k2;
+                const kind = ['least', 'greatest', 'count_all'][this.rand(0, 2)];
+                const lo = k1 + 1;
+                let followQ, followAns;
+                if (kind === 'least') {
+                    followQ = 'Write down the least integer which satisfies both inequalities in (a).';
+                    followAns = String(lo);
+                } else if (kind === 'greatest') {
+                    followQ = 'Write down the greatest integer which satisfies both inequalities in (a).';
+                    followAns = String(k2 - 1);
+                } else {
+                    followQ = 'How many integers satisfy both inequalities in (a)?';
+                    followAns = String(k2 - lo);
+                }
+                return {
+                    src: 'L3 frac-term', join: 'and', var: 'x', ineq1, ineq2, sol1, sol2, compound,
+                    compoundQ: `Find the range of values of x which satisfy both ${ineq1} and ${ineq2}.`,
+                    law1: 'clear_fraction', law2: 'isolate_x', lawCompound: 'intersect',
+                    followQ, followAns, followAccept: null, followLaw: 'count_integers'
+                };
+            },
+
             // ════════════ LEVEL 1 — TSA 3A03 + revised Paper 1 (2-part sets) ════════════
             generateL1Set: function () {
                 const roll = this.rand(0, 9);
@@ -1211,8 +1252,7 @@
 
             // ════════════ LEVEL 3 — original Paper 1 (2-part sets) ════════════
             generateL3Set: function () {
-                const idx = this.rand(0, this.SRC_FNS.length - 1);
-                const s = this[this.SRC_FNS[idx]]();
+                const s = this.rand(0, 4) === 0 ? this.fracCompoundSet() : this[this.SRC_FNS[this.rand(0, this.SRC_FNS.length - 1)]]();
                 const rawC = s.join === 'and' ? `${s.ineq1} and ${s.ineq2}` : `${s.ineq1} or ${s.ineq2}`;
                 const aText = s.join === 'and'
                     ? `Find the range of values of x which satisfy both&nbsp;${this.texCompound(rawC)}.`
