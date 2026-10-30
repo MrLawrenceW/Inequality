@@ -450,33 +450,40 @@
         const GOOGLE_SCRIPT_URL =
             'https://script.google.com/macros/s/AKfycbxMdA74aQ16yAZwpxdN0wk-SH_7MuMWUCRBGUqSD94XI-2TivivjU5FNjuUpPS1ShUyUA/exec';
 
-        const APP_VERSION = '8';
+        const APP_VERSION = '9';
         const IS_FEATURE = /\/feature\//.test(location.pathname);
         const MAIN_SITE_URL = 'https://mrlawrencew.github.io/Inequality/';
         const PROFILE_KEY = 'hkdse_ineq_profile';
-        let pendingVersionReload = false;   // a newer deploy was found; reload only when it is safe
+        let pendingVersionReload = false;   // a newer deploy was found
         (function watchAppVersion() {
             const file = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
-            const inGame = () => {
-                const g = document.getElementById('game-screen');
-                return !!g && !g.classList.contains('hidden');
+            const untouchedLogin = () => {
+                const l = document.getElementById('login-screen');
+                if (!l || l.classList.contains('hidden')) return false;
+                return ['student-class', 'student-no', 'student-name']
+                    .every(id => !document.getElementById(id).value.trim());
             };
-            const tryReload = () => {
-                if (pendingVersionReload && !inGame()) location.reload();
+            const showUpdateChip = () => {
+                if (document.getElementById('update-chip')) return;
+                const b = document.createElement('button');
+                b.id = 'update-chip';
+                b.textContent = '⬆ Update available — tap to refresh';
+                b.className = 'fixed top-3 right-3 z-50 bg-amber-500 text-slate-900 text-xs font-bold px-4 py-2 rounded-full shadow-2xl active:scale-95';
+                b.onclick = () => location.replace(location.pathname + '?v=' + Date.now());
+                document.body.appendChild(b);
             };
             const check = () => {
-                if (pendingVersionReload) { tryReload(); return; }
+                if (pendingVersionReload) { showUpdateChip(); return; }
                 fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
                     .then(r => r.json())
                     .then(data => {
                         if (!data || !data[file] || data[file] === APP_VERSION) return;
                         pendingVersionReload = true;
-                        if (inGame()) {
-                            // Never reload mid-exercise: students would be thrown back to the login page
-                            showToast("A new version is available. Finish or abort this level, then refresh.", "info");
-                        } else {
-                            location.reload();
-                        }
+                        // Auto-reload only on a completely blank login screen (nothing to lose).
+                        // Never reload a logged-in student or an active exercise: that is what
+                        // threw students back to the login page mid-lesson.
+                        if (untouchedLogin()) location.reload();
+                        else showUpdateChip();
                     })
                     .catch(() => {});
             };
@@ -2038,7 +2045,6 @@
         }
 
         function quitGame() {
-            if (pendingVersionReload) { location.reload(); return; }
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
             updatePassportUI();
