@@ -450,16 +450,40 @@
         const GOOGLE_SCRIPT_URL =
             'https://script.google.com/macros/s/AKfycbxMdA74aQ16yAZwpxdN0wk-SH_7MuMWUCRBGUqSD94XI-2TivivjU5FNjuUpPS1ShUyUA/exec';
 
-        const APP_VERSION = '6';
+        const APP_VERSION = '10';
         const IS_FEATURE = /\/feature\//.test(location.pathname);
         const MAIN_SITE_URL = 'https://mrlawrencew.github.io/Inequality/';
+        const PROFILE_KEY = 'hkdse_ineq_profile';
+        let pendingVersionReload = false;   // a newer deploy was found
         (function watchAppVersion() {
             const file = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
+            const untouchedLogin = () => {
+                const l = document.getElementById('login-screen');
+                if (!l || l.classList.contains('hidden')) return false;
+                return ['student-class', 'student-no', 'student-name']
+                    .every(id => !document.getElementById(id).value.trim());
+            };
+            const showUpdateChip = () => {
+                if (document.getElementById('update-chip')) return;
+                const b = document.createElement('button');
+                b.id = 'update-chip';
+                b.textContent = '⬆ Update available — tap to refresh';
+                b.className = 'fixed top-3 right-3 z-50 bg-amber-500 text-slate-900 text-xs font-bold px-4 py-2 rounded-full shadow-2xl active:scale-95';
+                b.onclick = () => location.replace(location.pathname + '?v=' + Date.now());
+                document.body.appendChild(b);
+            };
             const check = () => {
+                if (pendingVersionReload) { showUpdateChip(); return; }
                 fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
                     .then(r => r.json())
                     .then(data => {
-                        if (data && data[file] && data[file] !== APP_VERSION) location.reload();
+                        if (!data || !data[file] || data[file] === APP_VERSION) return;
+                        pendingVersionReload = true;
+                        // Auto-reload only on a completely blank login screen (nothing to lose).
+                        // Never reload a logged-in student or an active exercise: that is what
+                        // threw students back to the login page mid-lesson.
+                        if (untouchedLogin()) location.reload();
+                        else showUpdateChip();
                     })
                     .catch(() => {});
             };
@@ -1507,7 +1531,7 @@
 
         // --- CORE GAME LOGIC ---
 
-        function login() {
+        function login(auto) {
             const sClass = document.getElementById('student-class').value.trim().toUpperCase();
             const sNo = document.getElementById('student-no').value.trim();
             const sName = document.getElementById('student-name').value.trim();
@@ -1518,6 +1542,7 @@
             }
 
             studentProfile = { class: sClass, no: sNo, name: sName };
+            try { localStorage.setItem(PROFILE_KEY, JSON.stringify(studentProfile)); } catch (e) {}
             document.getElementById('display-name').textContent = `Welcome, ${sName}`;
             document.getElementById('display-class').textContent = sClass;
             document.getElementById('display-no').textContent = sNo;
@@ -1528,11 +1553,12 @@
             document.getElementById('dashboard-screen').classList.remove('hidden');
 
             updatePassportUI();
-            showToast(`Welcome aboard, ${sName}!`, "success");
+            if (!auto) showToast(`Welcome aboard, ${sName}!`, "success");
         }
 
         function logout() {
             studentProfile = null;
+            try { localStorage.removeItem(PROFILE_KEY); } catch (e) {}
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('student-class').value = '';
@@ -2246,6 +2272,17 @@
                 btn.disabled = false;
             });
         }
+
+        (function restoreProfile() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+                if (!saved || !saved.class || !saved.no || !saved.name) return;
+                document.getElementById('student-class').value = saved.class;
+                document.getElementById('student-no').value = saved.no;
+                document.getElementById('student-name').value = saved.name;
+                login(true);
+            } catch (e) { console.log('restoreProfile error', e); }
+        })();
     </script>
 </body>
 </html>
